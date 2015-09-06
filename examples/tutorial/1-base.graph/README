@@ -1,0 +1,5 @@
+Run the CnC graph translator tool with the provided specification
+file to generate a skeleton CnC-OCR project:
+
+ucnc_t Stencil1D.cnc
+

@@ -1,0 +1,5 @@
+Testing vector items and $when conditions.
+
+Expected output:
+
+avg = 0.103260

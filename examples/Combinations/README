@@ -1,0 +1,46 @@
+Combinations (n choose k) example for CnC
+=============================================
+
+Follow the instructions in the CnC README for building and installing the
+CnC runtime and toolchain.
+
+This program finds the value "n choose k" by calculating the first n rows of
+Pascal's Triangle. This is also the primary example used in the CnC Overview
+document available here: https://habanero.rice.edu/CnC+Resources
+
+This example includes the following files:
+
+    * Combinations.cnc:
+        Specification for this application's CnC graph structure. See the
+        comments in the file for a more detailed description.
+
+    * Combinations.c:
+        Contains the initialization and finalization functions for the CnC
+        graph. The init function does the initial puts and prescribes, and
+        also sets the (null) parameters for the finalization function. The
+        finalization function reads the value from row "n", column "k" of
+        the triangle, and prints that value as the result.
+
+    * Combinations_addToInside.c
+        The step functions for creating entries on the inside of the triangle.
+        These entries are computed by summing the two values in the row above,
+        at the current column and column-1. It also prescribes a step to
+        compute the entry in the same column of the next row.
+
+    * Combinations_addToLeftEdge.c, Combinations_addToRightEdge.c
+        The step functions for creating entries on the left and right edges of
+        the triangle. These values are always 1, so the calculation is trival.
+        Both steps prescribe the computation to compute an entry in the next
+        row (just like addToInside), but the addToRightEdge step additionally
+        prescribes an extra entry to expand that edge of the triangle.
+
+You need to run the CnC graph translator tool to generate the scaffolding
+code, and compile the application using the generated Makefile. You can also
+run the application via make. It takes the "n" and "k" values as an argument.
+
+        ucnc_t Combinations.cnc
+        make run WORKLOAD_ARGS="10 7"
+
+A successful run should yield output like the following:
+
+    10 choose 7 = 120

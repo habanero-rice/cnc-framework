@@ -1,0 +1,6 @@
+{#/* Inherit shared-memory item collection insertion functionality */-#}
+{% extends "ocr-x86/Makefile.x86" %}
+
+{% block ocr_type %}x86{% endblock %}
+{% block cnc_type %}tg-x86{% endblock %}
+{% block support_dir_name %}tg{% endblock %}

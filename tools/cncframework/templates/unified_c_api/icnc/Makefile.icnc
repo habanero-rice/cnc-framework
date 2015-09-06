@@ -1,0 +1,40 @@
+{#/* Inherit from generic CnC makefile */-#}
+{% extends "Makefile.common" %}
+
+{% block cnc_name_comment %}Intel CnC{% endblock %}
+
+{% block cnc_type %}icnc{% endblock %}
+
+{% block env_setup_post %}
+# Make sure we can find icnc
+ifndef CNCROOT
+$(error Please source the environment setup script for Intel CnC)
+endif #CNCROOT
+{% endblock env_setup_post %}
+
+{% block xtra_libs %}-lcnc -ltbb -ltbbmalloc{% endblock %}
+
+{% block xtra_srcs -%}
+SRCS += $(patsubst %,$(CNC_SUPPORT_DIR)/%.c,cnc_common {{g.name}}_step_ops)
+CPP_SRCS := $(patsubst %,$(CNC_SUPPORT_DIR)/%.cpp,icnc {{g.name}}_context)
+{% endblock xtra_srcs %}
+
+{% block xtra_objs -%}
+OBJS += $(patsubst %.cpp,$(WORKLOAD_BUILD)/%.o,$(CPP_SRCS))
+CFLAGS += -Wno-unused-variable
+{% endblock xtra_objs %}
+
+{% block xtra_targets %}
+# building C++ source files
+$(WORKLOAD_BUILD)/%.o: %.cpp $(HEADERS)
+	$(ensure_dir)
+	$(CXX) $(CFLAGS) -c $< -o $@
+{% endblock xtra_targets %}
+
+{% block linker %}$(CXX){% endblock %}
+
+{% block run_target -%}
+run: install
+	cd $(WORKLOAD_EXEC) && \
+	$(RUN_TOOL) ./$(TARGET) $(WORKLOAD_ARGS)
+{% endblock run_target %}

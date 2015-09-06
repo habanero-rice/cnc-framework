@@ -1,0 +1,48 @@
+{% macro include_icon(fname) %}
+<img src="data:image/png;base64,{{ embed_b64(fname) }}">
+{% endmacro %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{graph_title}}</title>
+    <style>
+{{ include_raw('index.css') }}
+    </style>
+  </head>
+  <body>
+    <div id="hidden_icon" style="display:none;">
+      {{ include_icon('icons/play.png') }}
+    </div>
+    <div id="control_container">
+      <table id="controls">
+        <tr>
+          <td id="start">
+            {{ include_icon('icons/start.png') }}
+          </td>
+          <td id="prev">
+            {{ include_icon('icons/prev.png') }}
+          </td>
+          <td id="playpause">
+            {{ include_icon('icons/pause.png') }}
+          </td>
+          <td id="next">
+            {{ include_icon('icons/next.png') }}
+          </td>
+          <td id="end">
+            {{ include_icon('icons/end.png') }}
+          </td>
+        </tr>
+      </table>
+      <input title="animation speed" type="range" value="850" min="0" max="1000" id="timestep" /><br>
+       autoscroll: <input title="autoscroll" type="checkbox" id="autoscroll" />
+    </div>
+    <div id="image_data">{{image_data}}</div>
+    <script>
+{{ include_raw('dag.js') }}
+{{ include_raw('animations.js') }}
+{{ include_raw('controls.js') }}
+{{ include_raw('index.js') }}
+    </script>
+  </body>
+</html>
+

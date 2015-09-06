@@ -1,0 +1,6 @@
+Test that ranges and virtual item collections work correctly.
+
+Expected output:
+
+Even total = 90
+Odd total = 100

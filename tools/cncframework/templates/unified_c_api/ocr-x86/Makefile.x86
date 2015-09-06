@@ -1,0 +1,83 @@
+{#/* Inherit from generic CnC makefile */-#}
+{% extends "Makefile.common" %}
+
+{% block cnc_name_comment %}CnC-OCR{% endblock %}
+
+{% block env_setup_pre %}
+OCR_TYPE         ?= {% block ocr_type %}x86{% endblock %}
+{%- endblock env_setup_pre %}
+
+{% block cnc_type %}$(OCR_TYPE){% endblock %}
+
+{% block env_setup_post %}
+# Make sure we can find OCR and CnC-OCR
+ifndef XSTACK_ROOT
+  ifndef OCR_INSTALL_ROOT
+    $(error Please define XSTACK_ROOT or OCR_INSTALL_ROOT)
+  endif #CNC_INSTALL_ROOT
+  ifndef UCNC_ROOT
+    $(error Please define XSTACK_ROOT or UCNC_ROOT)
+  endif #UCNC_ROOT
+  ifndef APPS_ROOT
+    $(error Please define XSTACK_ROOT or APPS_ROOT)
+  endif #APPS_ROOT
+else  #XSTACK_ROOT
+  OCR_INSTALL_ROOT ?= $(XSTACK_ROOT)/ocr/install/$(OCR_TYPE)
+  UCNC_ROOT        ?= $(XSTACK_ROOT)/hll/cnc
+  APPS_ROOT        ?= $(XSTACK_ROOT)/apps
+endif #XSTACK_ROOT
+
+OCR_ROOT   ?= $(shell dirname `dirname $(OCR_INSTALL_ROOT)`)
+OCR_AR     ?= $(OCR_INSTALL_ROOT)/lib/{% block libocr %}libocr.a{% endblock %}
+
+
+#################################################
+# RUN CONFIGURATION
+
+ifndef OCR_CONFIG
+OCR_CONFIG           := generated.cfg
+CONFIG_NUM_THREADS   ?= 4
+OCR_GENERATED_CONFIG := $(WORKLOAD_INSTALL)/$(OCR_CONFIG)
+endif #OCR_CONFIG
+
+WORKLOAD_ARGS ?=
+WORKLOAD_INPUT_FILE_IDX ?= 0
+{% endblock env_setup_post %}
+
+{% block xtra_incs %}-I$(OCR_INSTALL_ROOT)/include{% endblock %}
+
+{% block xtra_srcs -%}
+SRCS += $(patsubst %,$(CNC_SUPPORT_DIR)/%.c,cncocr cnc_common cncocr_itemcoll)
+SRCS += $(patsubst %,$(CNC_SUPPORT_DIR)/{{g.name}}_%_ops.c,step item graph)
+{% endblock xtra_srcs %}
+
+{% block xtra_o_deps %}| $(OCR_AR){% endblock %}
+
+{% block target_xtra_deps %}$(OCR_AR){% endblock %}
+
+{% block build_aux %}$(OCR_GENERATED_CONFIG){% endblock %}
+
+{% block xtra_targets %}
+# build the ocr runtime (if needed)
+$(OCR_AR):
+	@echo OCR_ROOT=$(OCR_ROOT)
+	@[ -f "$(OCR_ROOT)/ocr.dox" ] \
+		|| (echo "ERROR: Can't build OCR runtime (can't find OCR build directory)" && exit 1)
+	OCR_TYPE=$(OCR_TYPE) make -C $(OCR_ROOT) install
+
+ifdef OCR_GENERATED_CONFIG
+$(OCR_GENERATED_CONFIG):
+	$(ensure_dir)
+	$(OCR_ROOT)/scripts/Configs/config-generator.py $(CONFIG_FLAGS){% block xtra_config_flags %}{% endblock %} --threads $(CONFIG_NUM_THREADS) --remove-destination --output $@
+endif #OCR_GENERATED_CONFIG
+{% endblock xtra_targets %}
+
+{% block run_target -%}
+run: install
+	{% block run_checks %}{% endblock -%}
+	cd $(WORKLOAD_EXEC) && \
+	{% block run_cmd -%}
+	OCR_CONFIG=$(OCR_CONFIG) \
+	$(RUN_TOOL) ./$(TARGET) $(WORKLOAD_ARGS)
+	{%- endblock %}
+{% endblock run_target %}

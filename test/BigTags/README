@@ -1,0 +1,5 @@
+Test that steps with more than 8 tag components are handled correctly.
+
+Expected output:
+
+result is 14

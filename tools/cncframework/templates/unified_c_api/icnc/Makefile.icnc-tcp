@@ -1,0 +1,21 @@
+{#/* Inherit from shared-memory iCnC makefile */-#}
+{% extends "Makefile.icnc" %}
+
+{% block cnc_name_comment %}Distributed Intel CnC{% endblock %}
+
+{% block cnc_type %}icnc-tcp{% endblock %}
+
+{% block support_dir_name %}icnc{% endblock %}
+
+{% block xtra_objs -%}
+{{ super() }}
+CFLAGS += -DDIST_CNC="SOCKETS"
+{% endblock xtra_objs %}
+
+{% block xtra_install_files %}$(WORKLOAD_INSTALL)/icnc-tcp-start.sh{% endblock %}
+
+{% block run_target -%}
+run: install
+	cd $(WORKLOAD_EXEC) && \
+	DIST_CNC=SOCKETS CNC_SOCKET_HOST=./icnc-tcp-start.sh $(RUN_TOOL) ./$(TARGET) $(WORKLOAD_ARGS)
+{% endblock run_target %}

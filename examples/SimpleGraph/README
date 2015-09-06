@@ -1,0 +1,36 @@
+Simple graph example for CnC
+================================
+
+Follow the instructions in the CnC README for building and installing the
+CnC runtime and toolchain.
+
+This example includes the following files:
+
+    * SimpleGraph.cnc:
+        Specification for this application's CnC graph structure. This graph
+        uses singleton collections, which are specified using the "unit" tag,
+        represented by a pair of empty round brackets: (). Since singleton
+        collections contain only one value, they have no tag/key to distinguish
+        individual instances.
+
+    * SimpleGraph.c:
+        Contains the initialization and finalization functions for the CnC
+        graph. The init function does the initial puts and prescribes, and
+        also sets the (null) parameters for the finalization function. The
+        finalization function reads the single item in each collection (X
+        and Y), and prints their values.
+
+    * SimpleGraph_SX.c, SimpleGraph_SY.c
+        The step codes for putting a single time to the X and Y collections.
+
+You need to run the CnC graph translator tool to generate the scaffolding
+code, and compile the application using the generated Makefile. You can also
+run the application via make (it takes no arguments).
+
+        ucnc_t SimpleGraph.cnc
+        make run
+
+A successful run should yield output like the following:
+
+    X = 1
+    Y = 2

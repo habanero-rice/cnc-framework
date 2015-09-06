@@ -1,0 +1,18 @@
+Run the CnC graph translator tool with the provided specification
+file to generate a skeleton CnC-OCR project:
+
+ucnc_t Stencil1D.cnc
+
+The included Stencil1D_defs.h file defines some values used in the
+graph specification (e.g. NUM_TILES) that are necessary for the
+project to build correctly. This project should build and run:
+
+make run
+
+The skeleton functions have been fully fleshed-out in the provided
+Stencil1D.c and Stencil1D_stencil.c files. The edge cases are also
+correctly handled using conditional inputs. The program should now
+do some meaningful computation and give the following output:
+
+avg = 0.052438
+

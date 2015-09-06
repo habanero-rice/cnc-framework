@@ -1,0 +1,36 @@
+{#/* Inherit from shared-memory iCnC makefile */-#}
+{% extends "Makefile.icnc" %}
+
+{% block cnc_name_comment %}Distributed Intel CnC{% endblock %}
+
+{% block cnc_type %}icnc-mpi{% endblock %}
+
+{% block support_dir_name %}icnc{% endblock %}
+
+{% block env_setup_post %}
+{{ super() }}
+
+# Distributed (MPI)
+ifdef MPI_HOSTS
+  MPI_FLAGS := --machinefile $(MPI_HOSTS)
+else ifdef MPI_PPN
+  MPI_FLAGS := -np $(MPI_PPN)
+else
+  MPI_FLAGS := -np 2
+  CNC_MPI_WARNING := 'WARNING: Should specify MPI_HOSTS or MPI_PPN. Assuming 2 processes.'
+endif #MPI_HOSTS
+{% endblock env_setup_post %}
+
+{% block xtra_libs %}{{ super() }} -lcnc_mpi{% endblock %}
+
+{% block xtra_objs -%}
+{{ super() }}
+CFLAGS += -DDIST_CNC="MPI" -DDIST_CNC_MPI=1
+{% endblock xtra_objs %}
+
+{% block run_target -%}
+run: install
+	@[ -z "$(CNC_MPI_WARNING)" ] || echo $(CNC_MPI_WARNING)
+	cd $(WORKLOAD_EXEC) && \
+	DIST_CNC=MPI mpirun $(MPI_FLAGS) $(RUN_TOOL) ./$(TARGET) $(WORKLOAD_ARGS)
+{% endblock run_target %}

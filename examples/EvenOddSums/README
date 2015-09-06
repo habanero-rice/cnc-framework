@@ -1,0 +1,43 @@
+Simple summing example for CnC
+==================================
+
+Follow the instructions in the CnC README for building and installing the
+CnC runtime and toolchain.
+
+This program sums the even numbers and sums the odd numbers in the range from
+zero to n. The two sums are computed in parallel.
+
+This example includes the following files:
+
+    * EvenOddSums.cnc:
+        Specification for this application's CnC graph structure. This graph
+        uses "virtual" item collections, which simply provide a mapping from
+        the "virtual" keyspace onto the keyspace of another item collection.
+        This lets us refer to ranges of even and odd numbers in the graph.
+        The graph specification also makes use of the optional arguments that
+        can be provided to the intialization function (rather than using the
+        graph context). See the comments in the graph spec for more details.
+
+    * EvenOddSums.c:
+        Contains the initialization and finalization functions for the CnC
+        graph. The init function does the initial puts and prescribes, and
+        also sets the (null) parameters for the finalization function. The
+        finalization function reads the single item in each of the "Totals"
+        collections, and prints the results.
+
+    * EvenOddSums_sumEvens.c, EvenOddSums_sumOdds.c
+        The step functions for summing the even and odd numbers in the range
+        from zero to n. The two functions are actually identical except for
+        the names of the identifiers used.
+
+You need to run the CnC graph translator tool to generate the scaffolding
+code, and compile the application using the generated Makefile. You can also
+run the application via make. It takes the "n" value as an argument.
+
+        ucnc_t EvenOddSums.cnc
+        make run WORKLOAD_ARGS=100
+
+A successful run should yield output like the following:
+
+    Even total = 2450
+    Odd total = 2500

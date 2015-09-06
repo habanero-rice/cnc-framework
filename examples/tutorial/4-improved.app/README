@@ -1,0 +1,27 @@
+This improved version of the application sets up a global graph
+context (which stores values like numTiles), and initializes the
+context using command-line argument values.
+
+Rather than the initializer prescribing all stencil steps, it only
+prescribes those in the first timestep. Each stencil step for a later
+timestep is prescribed by the corresponding step for the preceding
+timestep. In other words, (stencil i, t) prescribes (stencil i, t+1).
+
+Run the CnC graph translator tool with the provided specification
+file to generate a skeleton CnC-OCR project:
+
+ucnc_t Stencil1D.cnc
+
+The included Main.c file parses the command line arguments. Since
+these parameters are set in the global graph context, there is no
+need to hard-code them in a header file (as done previously).
+
+make run WORKLOAD_ARGS="4 16 4"
+
+The skeleton functions have been fully fleshed-out in the provided
+Stencil1D.c and Stencil1D_stencil.c files. The edge cases are also
+correctly handled using conditional inputs. The program should now
+do some meaningful computation and give the following output:
+
+avg = 0.052438
+

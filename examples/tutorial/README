@@ -1,0 +1,13 @@
+This directory contains source code used in the CnC-OCR tutorial from the 4th
+Traleika Glacier Applications Workshop (April 6, 2015).
+
+The tutorial is a step-by-step guide for building a simple 1D stencil app
+using the CnC-OCR toolchain. The notes corresponding to this code are available
+on the CnC-OCR wiki's "Tutorials" section:
+
+https://github.com/habanero-rice/cnc-ocr/wiki#tutorials
+
+The tutorial does assume some familiarity with the CnC programming model. For
+background on CnC, please also refer to the wiki:
+
+https://github.com/habanero-rice/cnc-ocr/wiki/Workflow#the-cnc-programming-model

@@ -1,0 +1,31 @@
+{#/* Inherit from shared-memory OCR's makefile */-#}
+{% extends "Makefile.x86" %}
+
+{% block ocr_type %}x86-mpi{% endblock %}
+
+{# Use dynamically-linked OCR lib so that I don't need mpicc #}
+{% block libocr %}libocr.so{% endblock %}
+
+{% block platform_flags %}
+CFLAGS += -DCNC_DISTRIBUTED=1
+
+# Distributed (MPI)
+ifdef OCR_NODEFILE
+  MPI_FLAGS := --machinefile $(OCR_NODEFILE)
+else ifdef OCR_NUM_NODES
+  MPI_FLAGS := -np $(OCR_NUM_NODES)
+else
+  MPI_FLAGS := -np 2
+  CNC_MPI_WARNING := 'WARNING: Should specify OCR_NUM_NODES or OCR_NODEFILE. Assuming 2 nodes.'
+endif #OCR_NODEFILE
+{% endblock %}
+
+{% block xtra_config_flags %} --guid COUNTED_MAP --target mpi{% endblock %}
+
+{% block run_checks -%}
+@[ -z "$(CNC_MPI_WARNING)" ] || echo $(CNC_MPI_WARNING)
+	{% endblock %}
+
+{% block run_cmd -%}
+mpirun $(MPI_FLAGS) $(RUN_TOOL) ./$(TARGET) -ocr:cfg $(OCR_CONFIG) $(WORKLOAD_ARGS)
+{%- endblock %}

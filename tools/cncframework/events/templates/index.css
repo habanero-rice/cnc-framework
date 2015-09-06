@@ -1,0 +1,15 @@
+#control_container {
+    position: fixed;
+    right: 15px;
+}
+#controls {
+    border: 2px solid rgba(200,200,200,0.6);
+}
+#controls td {
+    padding-right: 4px;
+    padding-left: 4px;
+    cursor: pointer;
+}
+#controls img {
+    width: 20px;
+}

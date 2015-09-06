@@ -1,0 +1,74 @@
+Cholesky decomposition example for CnC-OCR
+==========================================
+
+This example application is part of the CnC-OCR distribution. For copyright
+and license information, please see the LICENSE file in xstack/hll/cnc/.
+
+Follow the instructions in the CnC-OCR README for building and installing the
+CnC-OCR runtime and toolchain. At a minimum, you should set the XSTACK_ROOT
+environment variable to the path to your xstack repository checkout. Running
+the run_test.sh script (as described at the end of this README) should build,
+run and verify this application.
+
+This example has two versions. One reads the input matrix from a file, which is
+the same functionality as the OCR Cholesky example. This version is in the
+"file_input" subdirectory. The other version automatically generates an input
+matrix, and is located in the "generated_input" subdirectory.
+
+Note that the "common" directory does not contain a full application. The
+directory contains only the common files shared between the two versions,
+and those files are softlinked in the directories of the two full projects.
+
+The file-input version of the application produces the factorized result
+matrix as an output file. For the generated-input version, the output matrix
+is simply checksummed, and that checksum is printed as the result. Since the
+checksum is influenced by rounding errors in the computation, the result may
+differ for the same input when using a different math library.
+
+The input file version of the application does not provide support code to
+preprocess the input file for FSim (TG) compatibility; therefore, only the
+generated input version currently supports running on the TG simulator.
+
+This example includes the following files:
+
+    * Cholesky.cnc:
+        Specification for this application's CnC graph structure.
+
+    * Main.c:
+        Entry point for the application. Precesses command-line arguments,
+        creates a CnC graph, and launches the computation.
+
+    * Cholesky.c:
+        Contains the initialization and finalization functions for the CnC
+        graph. The init function does the initial puts and prescribes, and
+        also sets the parameters for the finalization function. The
+        finalization function reads the final tile values.
+
+    * Cholesky_defs.h
+        A header included globally in the make process that provides the
+        definitions for all non-primitive types referenced in Cholesky.cnc.
+
+    * Cholesky_sequentialStep.c, Cholesky_trisolveStep.c Cholesky_updateStep.c
+        The step code for the three stages of the Cholesky computation.
+
+    * Cholesky_common.h
+        This header is included in Cholesky_defs.h, containing definitions
+        common between the two versions of the application.
+
+    * run_test.sh:
+        A shell script that runs the translator, makes the application
+        binary, runs the application and finally verifies the output.
+
+The "common" subdirectory contains common files, which are soft-linked in each
+of the versions' subdirectories. Only Main.c, Cholesky.c and Cholesky_defs.h
+are modified between the two versions.
+
+You must run the CnC-OCR graph translator tool to generate the scaffolding
+code, and compile the application using the provided Makefile. You can use
+the provided shell script to build and run the application:
+
+        ./run_test.sh
+
+The script runs the Cholesky computation with a moderate-sized input. The test
+should complete in less than 10 seconds, and if it was successful you should
+see an "OK" printed at the end of the output.
