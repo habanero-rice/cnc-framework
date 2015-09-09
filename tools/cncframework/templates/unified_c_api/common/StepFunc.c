@@ -4,7 +4,7 @@
 #include "{{g.name}}.h"
 
 /**
- * Step function defintion for "{{stepfun.collName}}"
+ * Step function definition for "{{stepfun.collName}}"
  */
 void {{util.qualified_step_name(stepfun)}}({{ util.print_tag(stepfun.tag, typed=True)
         }}{{ util.print_bindings(stepfun.inputItems, typed=True)
