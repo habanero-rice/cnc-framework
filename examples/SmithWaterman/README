@@ -35,10 +35,6 @@ This example includes the following files:
         The step code for the dynamic programming computation, calculating the
         maximal-score path through a single tile of the score matrix.
 
-    * SmithWaterman_initAboveStep.c, SmithWaterman_initLeftStep.c
-        The step codes for seeding the dynamic programming calculation with
-        initial values along the top and left rows of the score matrix.
-
     * SmithWaterman_defs.h
         A header included globally in the make process that provides the
         definitions for all non-primitive types referenced in SmithWaterman.cnc.
