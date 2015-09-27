@@ -51,7 +51,7 @@ $context {
 // Step 3 Executions
 ( updateStep: k, j, i )
  <- [ dataA1D @ data: j, i, k ],
-    [ dataB1D @ data: j, k, k+1 ],
+    [ dataB1D @ data: j, k, k+1 ] $when(i != j),
     [ dataC1D @ data: i, k, k+1 ]
  -> [ data: j, i, k+1 ];
 
