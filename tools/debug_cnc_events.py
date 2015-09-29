@@ -1,14 +1,20 @@
 #!/usr/bin/env python
-import sys
+import sys, os, os.path
 from collections import defaultdict
+
+def die_with_usage():
+    bin_name = os.environ['BIN_NAME'] or sys.argv[0]
+    sys.exit("Usage: {0} LOG_FILE".format(bin_name))
 
 argc = len(sys.argv)
 if argc == 2:
     infile = sys.argv[1]
-elif argc == 1:
-    infile = "cnc_events.log"
 else:
-    sys.exit("Too many arguments.")
+    die_with_usage()
+
+if not os.path.exists(infile):
+    print "ERROR! File not found:", infile
+    die_with_usage()
 
 items = defaultdict(set)
 steps = defaultdict(dict)

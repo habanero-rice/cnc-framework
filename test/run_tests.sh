@@ -19,7 +19,7 @@ for d in *; do
 
     if true; then
         cd $d && ${CNC_T:-ucnc_t} && ./implementSteps.sh
-    fi &>> "$TEST_LOG"
+    fi 2>&1 >> "$TEST_LOG"
     RES1="$?"
     EXPECTED_OUTPUT=`tail -n1 README`
     [ $RES1 = 0 ] && make run 2>&1 | tee -a "$TEST_LOG" | fgrep -q "$EXPECTED_OUTPUT"

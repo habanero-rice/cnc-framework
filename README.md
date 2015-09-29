@@ -1,15 +1,16 @@
 CnC Framework
 =============
 
-CnC Framework, version 1.1.0
+CnC Framework, version 1.1.x-dev
 
-Last updated on 2015-07-30
+Released on YYYY-MM-DD
 
 Some basic setup and usage instructions are included in this readme.
 More detailed instructions, tutorials, and API documentation are
 available online through our GitHub wiki:
 
 https://github.com/habanero-rice/cnc-framework/wiki
+
 
 Installation prerequisites
 --------------------------
@@ -139,5 +140,5 @@ Partial support for CnC was provided through the CDSC program of
 the National Science Foundation with an award in the 2009 Expedition
 in Computing Program.
 
-This work is actively supported as part of the DoE-funded Traleika Glacier
+This work is actively supported as part of the DOE-funded Traleika Glacier
 X-Stack project (Intel CS1924113).

@@ -6,7 +6,7 @@ from jinja2 import Environment, ChoiceLoader, PackageLoader, contextfilter
 
 from ordereddict import OrderedDict
 
-__version__ = "1.1.0"
+__version__ = "1.1.x-dev"
 
 
 ################################

@@ -33,11 +33,11 @@ pthread_mutex_t _cncDebugMutex = PTHREAD_MUTEX_INITIALIZER;
     {{util.g_ctx_var()}}->_guids.self = contextGuid;
     // initialize graph events
     // TODO - these events probably shouldn't be marked as carrying data
-    ocrEventCreate(&{{util.g_ctx_var()}}->_guids.finalizedEvent, OCR_EVENT_STICKY_T, TRUE);
-    ocrEventCreate(&{{util.g_ctx_var()}}->_guids.quiescedEvent, OCR_EVENT_STICKY_T, FALSE);
-    ocrEventCreate(&{{util.g_ctx_var()}}->_guids.doneEvent, OCR_EVENT_STICKY_T, TRUE);
-    ocrEventCreate(&{{util.g_ctx_var()}}->_guids.awaitTag, OCR_EVENT_ONCE_T, TRUE);
-    ocrEventCreate(&{{util.g_ctx_var()}}->_guids.contextReady, OCR_EVENT_LATCH_T, FALSE);
+    ocrEventCreate(&{{util.g_ctx_var()}}->_guids.finalizedEvent, OCR_EVENT_STICKY_T, EVT_PROP_TAKES_ARG);
+    ocrEventCreate(&{{util.g_ctx_var()}}->_guids.quiescedEvent, OCR_EVENT_STICKY_T, EVT_PROP_NONE);
+    ocrEventCreate(&{{util.g_ctx_var()}}->_guids.doneEvent, OCR_EVENT_STICKY_T, EVT_PROP_TAKES_ARG);
+    ocrEventCreate(&{{util.g_ctx_var()}}->_guids.awaitTag, OCR_EVENT_ONCE_T, EVT_PROP_TAKES_ARG);
+    ocrEventCreate(&{{util.g_ctx_var()}}->_guids.contextReady, OCR_EVENT_LATCH_T, EVT_PROP_NONE);
     #ifdef CNC_AFFINITIES
     {{util.g_ctx_var()}}->_affinityCount = affinityCount;
     // XXX - should use this for item collection affinities

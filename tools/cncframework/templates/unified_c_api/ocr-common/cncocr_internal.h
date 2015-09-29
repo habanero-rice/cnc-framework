@@ -14,7 +14,6 @@
 #endif /* CNC_AFFINITIES */
 
 #if CNCOCR_x86
-extern void *memcpy(void *dest, const void *src, size_t n);
 #    ifndef HAL_X86_64
 #    define hal_memCopy(dest, src, len, bg) memcpy(dest, src, len)
 #    define hal_fence() __sync_synchronize()

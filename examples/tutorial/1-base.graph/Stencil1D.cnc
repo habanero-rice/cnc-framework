@@ -18,8 +18,8 @@
 // stencil updater step
 ( stencil: i, t )
  <- [ tile:      i, t-1 ],
-    [ fromLeft:  i, t-1 ],
-    [ fromRight: i, t-1 ]
+    [ fromLeft:  i, t-1 ] $when(i > 0),
+    [ fromRight: i, t-1 ] $when(i+1 < NUM_TILES)
  -> [ newTile @ tile:      i,   t ],
     [ toRight @ fromLeft:  i+1, t ],
     [ toLeft  @ fromRight: i-1, t ];
