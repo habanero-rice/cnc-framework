@@ -28,7 +28,7 @@ OCR_BUILD_ROOT   ?= $(XSTACK_ROOT)/ocr/build
 OCR_INSTALL_ROOT ?= $(XSTACK_ROOT)/ocr/install
 
 # Use lockable OCR config
-OCR_CE_CONFIG ?= $(OCR_INSTALL_ROOT)/$(CE_TARGET)/config/ce-multialloc-default-lockable.cfg
+OCR_CE_CONFIG ?= $(OCR_INSTALL_ROOT)/$(CE_TARGET)/config/ce-default-lockable.cfg
 OCR_XE_CONFIG ?= $(OCR_INSTALL_ROOT)/$(XE_TARGET)/config/xe-default-lockable.cfg
 
 # APPLICATION

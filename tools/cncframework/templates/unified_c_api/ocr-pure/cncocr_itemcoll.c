@@ -3,11 +3,7 @@
 
 #include "cncocr_internal.h"
 
-#if CNCOCR_TG
-#define CNC_ITEMS_PER_BLOCK 8
-#else
 #define CNC_ITEMS_PER_BLOCK 64
-#endif /* CNCOCR_TG */
 
 #define CNC_ITEM_BLOCK_FULL(block) ((block)->count == CNC_ITEMS_PER_BLOCK)
 #define CNC_GETTER_GUID ((ocrGuid_t)-1)

@@ -26,7 +26,7 @@
 #endif
 
 #if CNCOCR_TG
-#define CNC_TABLE_SIZE 16
+#define CNC_TABLE_SIZE 128
 #else
 #define CNC_TABLE_SIZE 1024
 #endif
