@@ -1,0 +1,2 @@
+# Tell GitHub to look in tools/ for source files
+/tools/* linguist-vendored=false
