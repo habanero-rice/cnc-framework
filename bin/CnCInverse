@@ -1,0 +1,11 @@
+#!/bin/bash
+
+ROOT=${UCNC_ROOT-"${XSTACK_ROOT?Missing UCNC_ROOT or XSTACK_ROOT environment variable}/hll/cnc"}
+
+[ -f $ROOT/tools/py/.depsOK ] || bash $ROOT/tools/py/bootstrap.sh
+
+source $ROOT/tools/py/venv/bin/activate
+
+export BIN_NAME=$(basename "$0")
+python $ROOT/tools/step_inverse.py "$@"
+
