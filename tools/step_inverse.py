@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-import argparse
+import os
+from argparse import ArgumentParser
+from pprint import pprint
+
 from cncframework import graph, parser
 from cncframework.events.eventgraph import EventGraph
 from cncframework.inverse import find_step_inverses, find_blame_candidates, blame_deadlocks
-from pprint import pprint
-
 
 def pprint_inverses(graphData):
     for (step, func) in graphData.stepFunctions.iteritems():
@@ -14,13 +15,14 @@ def pprint_inverses(graphData):
 
 
 def main():
-    argParser = argparse.ArgumentParser(prog="CnCInverse",
-                                        description="Compute inverse output functions from CnC graph spec.")
-    argParser.add_argument('specfile', help="CnC graph spec file")
-    argParser.add_argument('--log', nargs='?', default=None, help="CnC debug log file")
-    argParser.add_argument(
-        '--blame', nargs='?', default=None, help="collection@tag or step@tag to blame")
-    args = argParser.parse_args()
+    bin_name = os.environ['BIN_NAME'] or "cncframework_inv"
+    arg_parser = ArgumentParser(prog=bin_name,
+                                description="Compute inverse output functions from CnC graph spec.")
+    arg_parser.add_argument('specfile', help="CnC graph spec file")
+    arg_parser.add_argument('--log', nargs='?', default=None, help="CnC debug log file")
+    arg_parser.add_argument('--blame', nargs='?', default=None,
+                            help="collection@tag or step@tag to blame")
+    args = arg_parser.parse_args()
 
     # Parse graph spec
     graphAst = parser.cncGraphSpec.parseFile(args.specfile, parseAll=True)
