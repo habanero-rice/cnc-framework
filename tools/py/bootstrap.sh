@@ -54,6 +54,7 @@ if ! [ -d venv ]; then
         && install_dep "$PYPI_SRC/a/argparse/argparse-1.2.1.tar.gz" \
         && install_dep "$PYPI_SRC/o/ordereddict/ordereddict-1.1.tar.gz" \
         && install_dep "$PYPI_SRC/C/Counter/Counter-1.0.0.tar.gz" \
+        && install_dep "$PYPI_SRC/s/sympy/sympy-0.7.6.tar.gz" \
         && touch .depsOK
     ) &> setup.log
 fi

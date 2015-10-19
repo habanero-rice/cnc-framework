@@ -1,3 +1,3 @@
 """
-cncocr.events: turn log files into dynamic computation graphs
+cncframework.events: turn log files into dynamic computation graphs
 """

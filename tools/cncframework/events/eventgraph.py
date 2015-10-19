@@ -11,32 +11,32 @@ class EventGraph(DAG):
     Directed acyclic graph for a CnC-OCR event log. Assumes that execution is
     serialized, i.e. no two activities can be running at the same time.
     '''
-    def __init__(self, event_log, prescribe=True, html=False):
+    def __init__(self, event_log, prescribe=True, post_process=True):
         """
         EventGraph: create a DAG representing an event log
 
         event_log parameter should be a list of strings, each element being a
         line in the event log.
         prescribe indicates whether prescribe edges will be added to the graph.
-        html indicates whether the graph should be prepared for HTML output.
-        This option embeds a bit of extra ordering information in the graph.
+        post_process indicates whether to emit warnings for possible errors
+        based on the graph.
         """
         super(EventGraph, self).__init__()
-        self.init_vars(prescribe, html)
+        self.init_vars(prescribe)
         for event in event_log:
             self.process_event(event)
-        self.post_process()
+        if post_process:
+            self.post_process()
 
-    def init_vars(self, prescribe, html):
+    def init_vars(self, prescribe):
         """
         Initialize instance variables to track events.
 
         Initialize internal variables which track state changes during
         process_event. Also put the init step on the graph as node 0.
         """
-        # whether to prescribe, whether it's html output
+        # whether to add prescribe edges
         self.prescribe = prescribe
-        self.html = html
         # id of the next node (start at 1 since init = 0)
         self._id_count = 1
         # action_label_tag identifier -> node id
@@ -47,18 +47,15 @@ class EventGraph(DAG):
         self._steps_run = []
         # prescribe node id -> (prescriber, [items in get list])
         self._steps_prescribed = {}
-        # list of node id's for items that have been get
-        self._items_gotten = []
         # list of node id's for items that have been put
         self._items_put = []
         # put init on the graph and style it like a step
         self.add_node(0)
         self.set_property(0, "label", "init")
-        self.style_step(0)
-        if self.html:
-            self.mark_running_time(0, 1)
-        # id of last step to enter running state
-        self._last_running_activity_tag = 0
+        self.style_step(0, "init", "0")
+        self.mark_running_time(0, 1)
+        # (id, tag) of last step to enter running state
+        self._last_running_activity_id_tag = (0, "0")
         # the id of the finalize node
         self.finalize_node = None
 
@@ -85,8 +82,8 @@ class EventGraph(DAG):
         if action == actions.PRESCRIBED:
             self.add_get_edges(node_id, node_label, self._activity_gets)
             if self.prescribe:
-                self.add_prescribe_edge(self._last_running_activity_tag, node_id)
-            self.style_step(node_id)
+                self.add_prescribe_edge(self._last_running_activity_id_tag[0], node_id)
+            self.style_step(node_id, label, tag)
             # clear out the activity get list to prepare for next prescribe
             self._activity_gets = []
             # track the finalize node
@@ -95,12 +92,10 @@ class EventGraph(DAG):
 
         elif action == actions.RUNNING:
             # create a new id which notes when this node runs
-            # only do this for html output because it's used for animations
-            if self.html:
-                self.mark_running_time(node_id,
-                        self.create_node_id(action, label, tag, force = True))
+            self.mark_running_time(node_id,
+                    self.create_node_id(action, label, tag, force = True))
             # record this tag as being the currently running activity
-            self._last_running_activity_tag = node_id
+            self._last_running_activity_id_tag = (node_id, tag)
             self._steps_run.append(node_id)
 
         elif action == actions.DONE:
@@ -109,18 +104,17 @@ class EventGraph(DAG):
 
         elif action == actions.GET_DEP:
             # happens before a step is prescribed, so we keep track of these items
-            self._activity_gets.append((node_id, node_label, label))
-            self._items_gotten.append(node_id)
+            self._activity_gets.append((node_id, node_label, label, tag))
 
         elif action == actions.PUT:
             self.add_put_edges(node_id, node_label,
-                               label, self._last_running_activity_tag)
+                               label, *self._last_running_activity_id_tag)
             self._items_put.append(node_id)
 
         else:
             print >>sys.stderr, "Unrecognized action %s" % action
 
-    def create_node_id(self, action, label, tag, force = False):
+    def create_node_id(self, action, label, tag, force=False):
         """
         Return a node id for the given action, label, tag.
 
@@ -142,21 +136,28 @@ class EventGraph(DAG):
 
     def mark_running_time(self, step_id, running_time):
         """Do something to step_id to indicate that it runs at running_time."""
-        self.set_property(step_id, "href", "%d" % running_time)
+        self.set_property(step_id, "href", "{}".format(running_time))
+        self.set_property(step_id, "run_time", running_time)
 
-    def style_step(self, step_id):
+    def style_step(self, step_id, step_name, step_tag):
         """Style the node for a step."""
         self.set_property(step_id, "color", styles.color('step'))
+        self.set_property(step_id, "tag", step_tag)
+        self.set_property(step_id, "name", step_name)
+        self.set_property(step_id, "type", "step")
 
-    def style_item(self, item_id, label, collection):
+    def style_item(self, item_id, label, collection_name, item_tag):
         """Style the node for an item."""
         self.set_property(item_id, "shape", styles.shape('item'))
-        self.set_property(item_id, "color", styles.color('item', collection))
+        self.set_property(item_id, "color", styles.color('item', collection_name))
         self.set_property(item_id, "label", label)
+        self.set_property(item_id, "tag", item_tag)
+        self.set_property(item_id, "name", collection_name)
+        self.set_property(item_id, "type", "item")
 
     def add_get_edges(self, step, step_label, items):
         """
-        Add get edges from each item node (id, label) to step node id.
+        Add get edges from each item node (id, label, collection, tag) to step node id.
 
         Adds, styles, and labels item nodes if they are not already on the
         graph.
@@ -164,10 +165,10 @@ class EventGraph(DAG):
         self.add_node_with_parents(step, [i[0] for i in items])
         self.set_property(step, "label", step_label)
         # these are collection nodes, so make them green boxes
-        for n, label, collection in items:
-            self.style_item(n, label, collection)
+        for n, label, collection, tag in items:
+            self.style_item(n, label, collection, tag)
 
-    def add_put_edges(self, item_id, item_label, collection, step_id):
+    def add_put_edges(self, item_id, item_label, collection, step_id, tag):
         """
         Add put edge from step node id to the item of given collection
 
@@ -176,12 +177,20 @@ class EventGraph(DAG):
         nodes. This is done because PUT ⇏  GET.
         """
         self.add_node_with_parents(item_id, [step_id])
-        self.style_item(item_id, item_label, collection)
+        self.style_item(item_id, item_label, collection, tag)
 
     def add_prescribe_edge(self, parent, child):
         """Add and style a prescribe edge from the parent id to the child id."""
         self.add_child(parent, child)
         self.set_edge_property(parent, child, "style", styles.style("prescribe"))
+
+    def gotten_without_put(self):
+        """Return set of item node id's with indegree = 0."""
+        return {n for n in self if self.property(n, "type") == "item" and not self.in_degree(n)}
+
+    def put_without_get(self):
+        """Return set of item node id's with outdegree = 0."""
+        return {n for n in self if self.property(n, "type") == "item" and not self.out_degree(n)}
 
     def post_process(self):
         """
@@ -216,8 +225,8 @@ class EventGraph(DAG):
         warn_on_duplicates(self._steps_prescribed.keys(), "prescribed")
         warn_on_duplicates(self._items_put, "put")
         # warn on items gotten but not put or put without get
-        gotten_without_put = set(self._items_gotten).difference(set(self._items_put))
-        put_without_get = set(self._items_put).difference(set(self._items_gotten))
+        gotten_without_put = self.gotten_without_put()
+        put_without_get = self.put_without_get()
         warn_on_existence(gotten_without_put, "Items with GET without PUT",
                           styles.color('get_without_put'))
         warn_on_existence(put_without_get, "Items with PUT without GET",
