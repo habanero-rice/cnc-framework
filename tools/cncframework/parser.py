@@ -36,6 +36,49 @@ def kind(tokStr):
 
 
 ##################################################
+# ERROR HELPERS
+
+closestMatchError = None
+
+def updateClosestMatchError(err):
+    global closestMatchError
+    if not closestMatchError:
+        closestMatchError = err
+    else:
+        currentLoc = (closestMatchError.lineno, closestMatchError.col)
+        newLoc = (err.lineno, err.col)
+        if newLoc > currentLoc:
+            closestMatchError = err
+
+class FailureHint(Token):
+    """Stores an error for the current clause. When used in conjunction
+       with parserErrorWrapper, this helps to return the error for the
+       *longest* match rather than the *most recent* match (which is the
+       pyparsing module's default behavior)."""
+    def __init__(self, msg):
+        super(FailureHint,self).__init__()
+        self.mayReturnEmpty = True
+        self.mayIndexError = False
+        self.msg = msg
+    def parseImpl(self, s, loc, doActions=True):
+        lnum = lineno(loc, s)
+        cnum = col(loc, s)
+        ex = ParseException(s, loc, self.msg, self)
+        updateClosestMatchError(ex)
+        raise ex
+
+def failure(msg):
+    return FailureHint(msg)
+
+def parserErrorWrapper(parser, specPath):
+    try:
+        return parser.parseFile(specPath, parseAll=True)
+    except ParseException as err:
+        updateClosestMatchError(err)
+        raise closestMatchError
+
+
+##################################################
 # C-STYLE VARIABLES AND EXPRESSIONS
 # (specify step I/O relationships for items/steps)
 
@@ -136,8 +179,9 @@ scalarTagExpr = rep1sep(scalarExpr)
 # ITEM INSTANCE REFERENCE
 # (used in step input/output relationships)
 
-itemRef = Group("[" + kind('ITEM') + Optional(cVar('binding') + "@") \
-               + cVar('collName') + ":" + tagExpr('key') + "]")
+itemRef = (Group("[" + kind('ITEM') + Optional(cVar('binding') + "@") \
+                + cVar('collName') + ":" + tagExpr('key') + "]")
+           | failure("Expected item reference"))
 
 
 ##################################################
@@ -172,7 +216,7 @@ stepRef = Group("(" + kind('STEP') + cVar('collName') \
 kwIf = CaselessKeyword("$if") + kind('IF')
 kwElse = CaselessKeyword("$else") + kind('ELSE')
 kwWhen = CaselessKeyword("$when") + kind('IF')
-instanceRef = itemRef | stepRef
+instanceRef = itemRef | stepRef | failure("Expected step or item reference")
 
 def condBlock(ref):
     refBlock = "{" + rep1sep(ref)('refs') + "}"
@@ -195,9 +239,10 @@ initFnName =  CaselessKeyword("$init") | CaselessKeyword("$initialize").suppress
 stepName = cVar | initFnName | CaselessKeyword("$finalize")
 stepDecl = Group("(" + stepName('collName') + ":" + tagDecl('tag') + ")")
 
-stepRelation = Group(stepDecl('step') \
-                    + Optional("<-" + condItemRefs('inputs')) \
-                    + Optional("->" + condInstanceRefs('outputs')) + ";")
+stepRelation = (Group(stepDecl('step') \
+                     + Optional("<-" + condItemRefs('inputs')) \
+                     + Optional("->" + condInstanceRefs('outputs')) + ";")
+                | failure("Expected step function declaration"))
 
 
 ##################################################
@@ -209,6 +254,9 @@ itemColls = ZeroOrMore(itemDecl)
 stepColls = OneOrMore(stepRelation)
 cncGraphSpec = graphCtx('ctx') + itemColls('itemColls') + stepColls('stepRels')
 cncGraphSpec.ignore(cppStyleComment)
+
+def parseGraphFile(specPath):
+    return parserErrorWrapper(cncGraphSpec, specPath)
 
 
 ##################################################
@@ -224,3 +272,7 @@ stepTunings = ZeroOrMore(stepTune)('stepTunings')
 
 cncTuningSpec = itemTunings + stepTunings
 cncTuningSpec.ignore(cppStyleComment)
+
+def parseTuningFile(specPath):
+    return parserErrorWrapper(cncTuningSpec, specPath)
+

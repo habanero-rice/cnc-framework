@@ -69,11 +69,11 @@ class UnifiedTranslator(object):
         # platform-specific setup
         platforms[self.args.platform]()
         # parse graph spec
-        graphAst = parser.cncGraphSpec.parseFile(self.args.specfile, parseAll=True)
+        graphAst = parser.parseGraphFile(self.args.specfile)
         self.g = graph.CnCGraph(self.graph_name, graphAst)
         # parse tuning specs
         for tuningSpec in (self.args.tuning_spec or []):
-            tuningAst = parser.cncTuningSpec.parseFile(tuningSpec, parseAll=True)
+            tuningAst = parser.parseTuningFile(tuningSpec)
             self.g.addTunings(tuningAst)
         # set up template environment
         self.templates_init()
