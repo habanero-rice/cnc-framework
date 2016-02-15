@@ -15,7 +15,7 @@ def pprint_inverses(graphData):
 
 
 def main():
-    bin_name = os.environ['BIN_NAME'] or "cncframework_inv"
+    bin_name = os.environ['BIN_NAME'] or "CnCInverse"
     arg_parser = ArgumentParser(prog=bin_name,
                                 description="Compute inverse output functions from CnC graph spec.")
     arg_parser.add_argument('specfile', help="CnC graph spec file")
