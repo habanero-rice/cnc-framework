@@ -5,7 +5,7 @@ This example application is part of the CnC-OCR distribution. For copyright
 and license information, please see the LICENSE file in xstack/hll/cnc/.
 
 Follow the instructions in the CnC-OCR README for building and installing the
-CnC-OCR runtime and toolchain. At a minimum, you should set the XSTACK_ROOT
+CnC-OCR runtime and toolchain. At a minimum, you should set the XSTG_ROOT
 environment variable to the path to your xstack repository checkout. Running
 the run_test.sh script (as described at the end of this README) should build,
 run and verify this application.

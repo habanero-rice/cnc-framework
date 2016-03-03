@@ -25,21 +25,22 @@ most of which should already be present on a standard Linux box:
 
 You will also need one or more of the supported runtime backends:
 
-* OCR 1.0
+* OCR 1.1
 * Intel CnC
 
 
 Setting up the environment for OCR
 ----------------------------------
 
-If you have a copy of the xstack repository, the CnC root directory (which
-contains this README) should be in the xstack/hll directory. The expected
+If you have a copy of the xstack apps repository, the CnC root directory (which
+contains this README) should be in the apps/hll directory. The expected
 directory structure is as follows:
 
-   - `xstack/` : the root xstack source directory
-   - `xstack/ocr/` : the source root for OCR
-   - `xstack/hll/` : high-level-libraries for OCR
-   - `xstack/hll/cnc/` : CnC root directory
+   - `xstg/` : the root xstack ("Traleika Glacier") project source directory
+   - `xstg/ocr/` : the source root for OCR
+   - `xstg/apps/` : the source root for xstack apps, libraries, etc
+   - `xstg/apps/hll/` : high-level-languages for OCR
+   - `xstg/apps/hll/cnc/` : CnC root directory
 
 If you don't have a copy of the xstack repository, you can still mimic this
 directory structure to get the expected behavior. To set the needed environment
@@ -47,9 +48,9 @@ variables, navigate to the CnC root directory and source `setup_env.sh`:
 
     source setup_env.sh
 
-This script sets the `XSTACK_ROOT` variable to point to the xstack repository
-root, `UCNC_ROOT` to point to the CnC root, and updates the `PATH` to include
-the CnC `bin` directory (which contains the graph translator tool).
+This script sets the `XSTG_ROOT` variable to point to the root xstack project
+directory, `UCNC_ROOT` to point to the CnC root, and updates the `PATH` to
+include the CnC `bin` directory (which contains the graph translator tool).
 
 OCR is the current default backend runtime for the CnC framework.
 

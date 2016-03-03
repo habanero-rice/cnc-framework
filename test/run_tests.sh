@@ -1,9 +1,10 @@
 #!/bin/bash
 
-TEST_ROOT="${UCNC_ROOT-"${XSTACK_ROOT?Missing UCNC_ROOT or XSTACK_ROOT environment variable}/hll/cnc"}/test"
+TEST_ROOT="${UCNC_ROOT-"${XSTG_ROOT?Missing UCNC_ROOT or XSTG_ROOT environment variable}/apps/hll/cnc"}/test"
 TOTAL=0
 FAILURES=0
 TEST_LOG="$TEST_ROOT/test.log"
+UCNC_T="${UCNC_ROOT}/bin/ucnc_t"
 
 # Clear test log
 echo -n > "$TEST_LOG"
@@ -18,7 +19,7 @@ for d in *; do
     echo ">>> Running test $d" | tee -a "$TEST_LOG"
 
     if true; then
-        cd $d && ${CNC_T:-ucnc_t} && ./implementSteps.sh
+        cd $d && ${CNC_T:-${UCNC_T}} && ./implementSteps.sh
     fi 2>&1 >> "$TEST_LOG"
     RES1="$?"
     EXPECTED_OUTPUT=`tail -n1 README`

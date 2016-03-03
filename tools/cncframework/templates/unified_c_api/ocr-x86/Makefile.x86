@@ -11,21 +11,21 @@ OCR_TYPE         ?= {% block ocr_type %}x86{% endblock %}
 
 {% block env_setup_post %}
 # Make sure we can find OCR and CnC-OCR
-ifndef XSTACK_ROOT
+ifndef XSTG_ROOT
   ifndef OCR_INSTALL_ROOT
-    $(error Please define XSTACK_ROOT or OCR_INSTALL_ROOT)
+    $(error Please define XSTG_ROOT or OCR_INSTALL_ROOT)
   endif #CNC_INSTALL_ROOT
   ifndef UCNC_ROOT
-    $(error Please define XSTACK_ROOT or UCNC_ROOT)
+    $(error Please define XSTG_ROOT or UCNC_ROOT)
   endif #UCNC_ROOT
   ifndef APPS_ROOT
-    $(error Please define XSTACK_ROOT or APPS_ROOT)
+    $(error Please define XSTG_ROOT or APPS_ROOT)
   endif #APPS_ROOT
-else  #XSTACK_ROOT
-  OCR_INSTALL_ROOT ?= $(XSTACK_ROOT)/ocr/install/$(OCR_TYPE)
-  UCNC_ROOT        ?= $(XSTACK_ROOT)/hll/cnc
-  APPS_ROOT        ?= $(XSTACK_ROOT)/apps
-endif #XSTACK_ROOT
+else  #XSTG_ROOT
+  OCR_INSTALL_ROOT ?= $(XSTG_ROOT)/ocr/ocr/install/$(OCR_TYPE)
+  UCNC_ROOT        ?= $(XSTG_ROOT)/apps/hll/cnc
+  APPS_ROOT        ?= $(XSTG_ROOT)/apps/apps
+endif #XSTG_ROOT
 
 OCR_ROOT   ?= $(shell dirname `dirname $(OCR_INSTALL_ROOT)`)
 OCR_AR     ?= $(OCR_INSTALL_ROOT)/lib/{% block libocr %}libocr.a{% endblock %}

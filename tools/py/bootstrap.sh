@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ROOT="${UCNC_ROOT-"${XSTACK_ROOT?Missing UCNC_ROOT or XSTACK_ROOT environment variable}/hll/cnc"}"
+ROOT="${UCNC_ROOT-"${XSTG_ROOT?Missing UCNC_ROOT or XSTG_ROOT environment variable}/apps/hll/cnc"}"
 
 echo "Installing CnC translator dependencies..."
 
@@ -44,7 +44,7 @@ get_venv() {
 cd $ROOT/tools/py/
 
 if ! [ -d venv ]; then
-    PY=${CNCOCR_PYTHON:-python}
+    PY=${UCNC_PYTHON:-python}
     CUSTOM_PY="-p $PY"
     (   get_venv \
         && $PY $VENV/virtualenv.py $CUSTOM_PY --no-site-packages venv \

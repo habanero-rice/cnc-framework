@@ -2,19 +2,19 @@
 # and cannot be distributed without it. This notice cannot be
 # removed or modified.
 
-ifndef XSTACK_ROOT
-  $(error Need to specify XSTACK_ROOT!)
+ifndef XSTG_ROOT
+  $(error Need to specify XSTG_ROOT!)
 endif
 
 # APPS
-APPS_ROOT       ?= $(XSTACK_ROOT)/apps
-APPS_LIBS_ROOT  ?= $(XSTACK_ROOT)/apps/libs/tg
+APPS_ROOT       ?= $(XSTG_ROOT)/apps/apps
+APPS_LIBS_ROOT  ?= $(XSTG_ROOT)/apps/apps/libs/tg
 
 # OCR_TYPE
 OCR_TYPE    ?= tg
 
 # TG
-TG_ROOT     ?= $(XSTACK_ROOT)/../intel/ss
+TG_ROOT     ?= $(XSTG_ROOT)/tg/tg
 TG_INSTALL  ?= $(TG_ROOT)/install
 
 # OCR
@@ -23,9 +23,9 @@ XE_BUILDER  ?= builder-xe
 CE_TARGET   ?= tg-ce
 CE_BUILDER  ?= builder-ce
 
-OCR_ROOT         ?= $(XSTACK_ROOT)/ocr
-OCR_BUILD_ROOT   ?= $(XSTACK_ROOT)/ocr/build
-OCR_INSTALL_ROOT ?= $(XSTACK_ROOT)/ocr/install
+OCR_ROOT         ?= $(XSTG_ROOT)/ocr/ocr
+OCR_BUILD_ROOT   ?= $(XSTG_ROOT)/ocr/ocr/build
+OCR_INSTALL_ROOT ?= $(XSTG_ROOT)/ocr/ocr/install
 
 # Use lockable OCR config
 OCR_CE_CONFIG ?= $(OCR_INSTALL_ROOT)/$(CE_TARGET)/config/ce-default-lockable.cfg

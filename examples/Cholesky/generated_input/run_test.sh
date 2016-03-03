@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Guess XSTACK_ROOT and UCNC_ROOT if they're not already set
-export XSTACK_ROOT="${XSTACK_ROOT-${PWD%/xstack/*}/xstack}"
-export UCNC_ROOT="${UCNC_ROOT-${XSTACK_ROOT}/hll/cnc}"
+# Guess XSTG_ROOT and UCNC_ROOT if they're not already set
+export XSTG_ROOT="${XSTG_ROOT-${PWD%/xstg/*}/xstg}"
+export UCNC_ROOT="${UCNC_ROOT-${XSTG_ROOT}/apps/hll/cnc}"
 UCNC_BIN="${UCNC_ROOT}/bin"
 
 # Sanity check on the above paths

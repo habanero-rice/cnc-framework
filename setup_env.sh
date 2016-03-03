@@ -1,12 +1,13 @@
 # Only execute from the installation directory
 if [ -f setup_env.sh ] && [ -f ./bin/ucnc_t ]; then
-    if [ -d "$XSTACK_ROOT" ]; then
-        echo 'Using existing $XSTACK_ROOT (CnC-OCR)'
+    if [ -d "$XSTG_ROOT" ]; then
+        echo 'Using existing $XSTG_ROOT (CnC-OCR)'
     elif [ -d "$OCR_INSTALL_ROOT" ]; then
         echo 'Using existing $OCR_INSTALL_ROOT (CnC-OCR)'
     elif [ "$(basename $(dirname $PWD))" = hll ]; then
-        export XSTACK_ROOT=$(dirname $(dirname $PWD))
-        echo 'Set $XSTACK_ROOT'
+        # assume CnC-OCR is in xstg/apps/hll/cnc
+        export XSTG_ROOT=$(dirname $(dirname $(dirname $PWD)))
+        echo 'Set $XSTG_ROOT'
     elif [ -d "$CNCROOT" ]; then
         echo 'Using existing $CNCROOT (iCnC)'
     else

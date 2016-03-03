@@ -2,9 +2,9 @@
 
 TMPFILE=.tmp.out
 
-# Guess XSTACK_ROOT and UCNC_ROOT if they're not already set
-export XSTACK_ROOT="${XSTACK_ROOT-${PWD%/xstack/*}/xstack}"
-export UCNC_ROOT="${UCNC_ROOT-${XSTACK_ROOT}/hll/cnc}"
+# Guess XSTG_ROOT and UCNC_ROOT if they're not already set
+export XSTG_ROOT="${XSTG_ROOT-${PWD%/xstg/*}/xstg}"
+export UCNC_ROOT="${UCNC_ROOT-${XSTG_ROOT}/apps/hll/cnc}"
 
 ### Setup ###
 
@@ -20,7 +20,7 @@ fi
 # Build
 make || exit 1
 
-DATA_DIR="${XSTACK_ROOT}/apps/smithwaterman/datasets"
+DATA_DIR="${XSTG_ROOT}/apps/apps/smithwaterman/datasets"
 
 ### Test 1 (small) ###
 

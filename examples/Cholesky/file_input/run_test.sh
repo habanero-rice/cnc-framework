@@ -7,10 +7,9 @@ else
     MD5BIN=md5sum
 fi
 
-# Guess XSTACK_ROOT and UCNC_ROOT if they're not already set
-export XSTACK_ROOT="${XSTACK_ROOT-${PWD%/xstack/*}/xstack}"
-export UCNC_ROOT="${UCNC_ROOT-${XSTACK_ROOT}/hll/cnc}"
-UCNC_BIN="${UCNC_ROOT}/bin"
+# Guess XSTG_ROOT and UCNC_ROOT if they're not already set
+export XSTG_ROOT="${XSTG_ROOT-${PWD%/xstg/*}/xstg}"
+export UCNC_ROOT="${UCNC_ROOT-${XSTG_ROOT}/apps/hll/cnc}"
 
 # Sanity check on the above paths
 if ! [ -f "${UCNC_ROOT}/bin/ucnc_t" ]; then
@@ -19,7 +18,7 @@ if ! [ -f "${UCNC_ROOT}/bin/ucnc_t" ]; then
 fi
 
 # Run the translator if needed
-[ -d "cnc_support" ] || "${UCNC_BIN}/ucnc_t"
+[ -d "cnc_support" ] || "${UCNC_ROOT}/bin/ucnc_t"
 
 # Build
 make || exit 1
@@ -29,7 +28,7 @@ INPATH="$PWD/inputs"
 # Download the input if the user doesn't have an inputs directory
 if ! [ -d "$INPATH" ]; then
     mkdir $INPATH
-    M2000="$XSTACK_ROOT/apps/cholesky/datasets/cholesky2000.tgz"
+    M2000="$XSTG_ROOT/apps/apps/cholesky/datasets/cholesky2000.tgz"
     if [ -f "$M2000" ]; then
         tar -C "$INPATH" -xzf "$M2000" m_2000.in
     else
