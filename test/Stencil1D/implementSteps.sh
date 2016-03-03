@@ -12,7 +12,7 @@ sed -i.bak '{
 s`^\( *\)/. TODO: Initialize tile ./`\1int j;'"$LF"'\1for (j=0; j<ctx->tileWidth; j++) tile[j] = 0;`;
 s`/. TODO: Initialize \(left\|right\) ./`*\1 = 0;`;
 s`void Stencil1D_cncFinalize.*{$`& '"$LF"'    double total = 0;`
-s`^\(\(    \)*\)/. TODO: Do something with tile._i. ./`\1int j;'"$LF"'\1for (j=0; j<ctx->tileWidth; j++) total += tile[_i][j];'"$LF"'\2\2}'"$LF"'\2\2{'"$LF"'\1double count = ctx->tileWidth * (ctx->lastTile + 1);'"$LF"'\1printf("avg = %f'"$LF"'", total/count);`
+s`^\(\(    \)*\)/. TODO: Do something with tile._i. ./`\1int j;'"$LF"'\1for (j=0; j<ctx->tileWidth; j++) total += tile[_i][j];'"$LF"'\2\2}'"$LF"'\2\2{'"$LF"'\1double count = ctx->tileWidth * (ctx->lastTile + 1);'"$LF"'\1printf("avg = %f\\n", total/count);`
 }' Stencil1D.c
 
 sed -i.bak '{
