@@ -22,13 +22,13 @@ ifndef XSTG_ROOT
     $(error Please define XSTG_ROOT or APPS_ROOT)
   endif #APPS_ROOT
 else  #XSTG_ROOT
-  OCR_INSTALL_ROOT ?= $(XSTG_ROOT)/ocr/ocr/install/$(OCR_TYPE)
+  OCR_INSTALL_ROOT ?= $(XSTG_ROOT)/ocr/ocr/install
   UCNC_ROOT        ?= $(XSTG_ROOT)/apps/hll/cnc
   APPS_ROOT        ?= $(XSTG_ROOT)/apps/apps
 endif #XSTG_ROOT
 
-OCR_ROOT   ?= $(shell dirname `dirname $(OCR_INSTALL_ROOT)`)
-OCR_AR     ?= $(OCR_INSTALL_ROOT)/lib/{% block libocr %}libocr.a{% endblock %}
+OCR_ROOT   ?= $(shell dirname "$(OCR_INSTALL_ROOT)")
+OCR_AR     ?= $(OCR_INSTALL_ROOT)/lib/{% block libocr %}libocr_$(OCR_TYPE).a{% endblock %}
 
 
 #################################################
@@ -68,7 +68,7 @@ $(OCR_AR):
 ifdef OCR_GENERATED_CONFIG
 $(OCR_GENERATED_CONFIG):
 	$(ensure_dir)
-	$(OCR_ROOT)/scripts/Configs/config-generator.py $(CONFIG_FLAGS){% block xtra_config_flags %}{% endblock %} --threads $(CONFIG_NUM_THREADS) --remove-destination --output $@
+	$(OCR_INSTALL_ROOT)/share/ocr/scripts/Configs/config-generator.py $(CONFIG_FLAGS){% block xtra_config_flags %}{% endblock %} --threads $(CONFIG_NUM_THREADS) --remove-destination --output $@
 endif #OCR_GENERATED_CONFIG
 {% endblock xtra_targets %}
 

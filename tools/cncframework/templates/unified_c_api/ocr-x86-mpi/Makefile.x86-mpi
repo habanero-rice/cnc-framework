@@ -4,7 +4,7 @@
 {% block ocr_type %}x86-mpi{% endblock %}
 
 {# Use dynamically-linked OCR lib so that I don't need mpicc #}
-{% block libocr %}libocr.so{% endblock %}
+{% block libocr %}libocr_$(OCR_TYPE).so{% endblock %}
 
 {% block platform_flags %}
 CFLAGS += -DCNC_DISTRIBUTED=1
