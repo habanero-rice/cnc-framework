@@ -70,7 +70,13 @@ pre_build: {% block target_xtra_deps %}{% endblock %}
 
 build: pre_build $(WORKLOAD_BUILD)/$(TARGET) {% block build_aux %}{% endblock %}
 
+ifeq ($(RUN_JENKINS), runApp)
+# Ignore build/install if Jenkins is running the app
+install:
+else
+# Normal installation
 install: build $(WORKLOAD_INSTALL)/$(TARGET) $(WORKLOAD_INSTALL)/Makefile.$(CNC_TYPE) {% block xtra_install_files %}{% endblock %}
+endif
 
 ensure_dir = @mkdir -p $(@D)
 
