@@ -29,6 +29,7 @@ $context {
 // Write graph inputs and start steps
 ( $initialize: () )
     -> [ startTime: () ],
+       [ data: () ],
        ( swStep: 0, $range(#ntw) );
 
 ( $finalize: () )
