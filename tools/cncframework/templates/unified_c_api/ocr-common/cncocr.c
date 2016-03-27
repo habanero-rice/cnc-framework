@@ -15,11 +15,12 @@ static ocrGuid_t _shutdownEdt(u32 paramc, u64 paramv[], u32 depc, ocrEdtDep_t de
 void cncAutomaticShutdown(ocrGuid_t doneEvent) {
     ocrGuid_t shutdownEdtGuid, templGuid;
     ocrEdtTemplateCreate(&templGuid, _shutdownEdt, 0, 1);
+    ocrHint_t hint;
     ocrEdtCreate(&shutdownEdtGuid, templGuid,
         /*paramc=*/EDT_PARAM_DEF, /*paramv=*/NULL,
         /*depc=*/EDT_PARAM_DEF, /*depv=*/&doneEvent,
         /*properties=*/EDT_PROP_NONE,
-        /*affinity=*/_cncCurrentAffinity(), /*outEvent=*/NULL);
+        /*hint=*/_cncCurrentEdtAffinityHint(&hint), /*outEvent=*/NULL);
     ocrEdtTemplateDestroy(templGuid);
 }
 

@@ -32,7 +32,7 @@
 #endif
 
 #define _CNC_ITEM_MODE DB_MODE_RW
-#define _CNC_DBCREATE(guid, ptr, sz) _CNC_DBCREATE_PLACED(guid, ptr, sz, NULL_GUID)
+#define _CNC_DBCREATE(guid, ptr, sz) _CNC_DBCREATE_PLACED(guid, ptr, sz, NULL_HINT)
 #define _CNC_DBCREATE_PLACED(guid, ptr, sz, loc) ocrDbCreate(guid, ptr, sz, DB_PROP_SINGLE_ASSIGNMENT, loc, NO_ALLOC)
 
 {% block tag_util -%}
@@ -124,6 +124,28 @@ static inline ocrGuid_t _cncAffinityFromRank(cncLocation_t rank, ocrGuid_t affin
     #else
     return NULL_GUID;
     #endif /* CNC_AFFINITIES */
+}
+
+static inline ocrHint_t *_cncAffinityHint(ocrHint_t *h, ocrHintType_t ht, ocrHintProp_t hp, ocrGuid_t a) {
+    #ifdef CNC_AFFINITIES
+    ocrHintInit(h, ht);
+    ocrSetHintValue(h, hp, ocrAffinityToHintValue(a));
+    return h;
+    #else
+    return NULL_HINT;
+    #endif
+}
+
+static inline ocrHint_t *_cncDbAffinityHint(ocrHint_t *hint, ocrGuid_t a) {
+    return _cncAffinityHint(hint, OCR_HINT_DB_T, OCR_HINT_DB_AFFINITY, a);
+}
+
+static inline ocrHint_t *_cncEdtAffinityHint(ocrHint_t *hint, ocrGuid_t a) {
+    return _cncAffinityHint(hint, OCR_HINT_EDT_T, OCR_HINT_EDT_AFFINITY, a);
+}
+
+static inline ocrHint_t *_cncCurrentEdtAffinityHint(ocrHint_t *hint) {
+    return _cncEdtAffinityHint(hint, _cncCurrentAffinity());
 }
 
 #ifdef CNC_AFFINITIES

@@ -28,7 +28,8 @@ pthread_mutex_t _cncDebugMutex = PTHREAD_MUTEX_INITIALIZER;
     ocrAffinityCount(AFFINITY_PD, &affinityCount);
     ctxBytes += sizeof(ocrGuid_t) * affinityCount;
     #endif /* CNC_AFFINITIES */
-    ocrDbCreate(&contextGuid, (void**)&{{util.g_ctx_var()}}, ctxBytes, DB_PROP_NONE, NULL_GUID, NO_ALLOC);
+    // IMPORTANT! We do NOT use _CNC_DBCREATE here because we do NOT want DB_PROP_SINGLE_ASSIGNMENT
+    ocrDbCreate(&contextGuid, (void**)&{{util.g_ctx_var()}}, ctxBytes, DB_PROP_NONE, NULL_HINT, NO_ALLOC);
     // store a copy of its guid inside
     {{util.g_ctx_var()}}->_guids.self = contextGuid;
     // initialize graph events
@@ -52,11 +53,14 @@ pthread_mutex_t _cncDebugMutex = PTHREAD_MUTEX_INITIALIZER;
         void *data;
         for (i=0; i<affinityCount; i++) {
             ocrGuid_t a = {{util.g_ctx_var()}}->_affinities[i];
-            if (a == currentLoc) {
+            if (ocrGuidIsEq(a, currentLoc)) {
                 {{util.g_ctx_var()}}->_affinities[i] = contextGuid;
             }
             else {
-                ocrDbCreate(&{{util.g_ctx_var()}}->_affinities[i], &data, ctxBytes, DB_PROP_NO_ACQUIRE, a, NO_ALLOC);
+                ocrHint_t hint;
+                // IMPORTANT! We do NOT use _CNC_DBCREATE here because we do NOT want DB_PROP_SINGLE_ASSIGNMENT
+                ocrDbCreate(&{{util.g_ctx_var()}}->_affinities[i], &data, ctxBytes, DB_PROP_NO_ACQUIRE,
+                        _cncDbAffinityHint(&hint, a), NO_ALLOC);
             }
         }
     }
@@ -114,18 +118,19 @@ static void _distSetup({{util.g_ctx_param()}}) {
     ocrEdtTemplateCreate(&templGuid, _distInitEdt, 1, 2);
     for (r=0; r<ranks; r++) {
         loc = _cncAffinityFromRank(r, {{util.g_ctx_var()}}->_affinities);
-        if (loc == currentLoc) {
+        if (ocrGuidIsEq(loc, currentLoc)) {
             {{util.g_ctx_var()}}->_rank = r;
             _initCtxColls({{util.g_ctx_var()}});
         }
         else {
             ocrEventSatisfySlot({{util.g_ctx_var()}}->_guids.contextReady, NULL_GUID, OCR_EVENT_LATCH_INCR_SLOT);
             const ocrGuid_t remoteCtx = {{util.g_ctx_var()}}->_affinities[r];
+            ocrHint_t hint;
             ocrEdtCreate(&edtGuid, templGuid,
                     /*paramc=*/EDT_PARAM_DEF, /*paramv=*/&r,
                     /*depc=*/EDT_PARAM_DEF, /*depv=*/NULL,
                     /*properties=*/EDT_PROP_NONE,
-                    /*affinity=*/loc, /*outEvent=*/NULL);
+                    /*hint=*/_cncEdtAffinityHint(&hint, loc), /*outEvent=*/NULL);
             ocrAddDependence({{util.g_ctx_var()}}->_guids.self, edtGuid, 0, DB_MODE_RO);
             ocrAddDependence(remoteCtx, edtGuid, 1, DB_DEFAULT_MODE);
         }
@@ -174,11 +179,12 @@ static ocrGuid_t _stepsFinishEdt(u32 paramc, u64 paramv[], u32 depc, ocrEdtDep_t
     // finalizer's output event.
     ocrGuid_t emptyEdtGuid, templGuid;
     ocrEdtTemplateCreate(&templGuid, _emptyEdt, 0, 1);
+    ocrHint_t hint;
     ocrEdtCreate(&emptyEdtGuid, templGuid,
         /*paramc=*/EDT_PARAM_DEF, /*paramv=*/NULL,
         /*depc=*/EDT_PARAM_DEF, /*depv=*/&{{util.g_ctx_var()}}->_guids.finalizedEvent,
         /*properties=*/EDT_PROP_NONE,
-        /*affinity=*/_cncCurrentAffinity(), /*outEvent=*/NULL);
+        /*hint=*/_cncCurrentEdtAffinityHint(&hint), /*outEvent=*/NULL);
     // XXX - destroying this template caused crash on FSim
     //ocrEdtTemplateDestroy(templGuid);
     // Start graph execution
@@ -212,11 +218,13 @@ void {{g.name}}_launch({{util.g_args_param()}}, {{util.g_ctx_param()}}) {
     // create a finish EDT for the CnC graph
     {
         ocrEdtTemplateCreate(&edtTemplateGuid, _stepsFinishEdt, 0, 3);
+        ocrHint_t _hint;
         ocrEdtCreate(&graphEdtGuid, edtTemplateGuid,
                 /*paramc=*/EDT_PARAM_DEF, /*paramv=*/NULL,
                 /*depc=*/EDT_PARAM_DEF, /*depv=*/NULL,
                 /*properties=*/EDT_PROP_FINISH,
-                /*affinity=*/_affinity, /*outEvent=*/&outEventGuid);
+                /*hint=*/_cncEdtAffinityHint(&_hint, _affinity),
+                /*outEvent=*/&outEventGuid);
         ocrEdtTemplateDestroy(edtTemplateGuid);
         // hook the graph's quiescedEvent into the graph's output event
         ocrAddDependence(outEventGuid, {{util.g_ctx_var()}}->_guids.quiescedEvent, 0, DB_DEFAULT_MODE);
@@ -238,11 +246,13 @@ void {{g.name}}_launch({{util.g_args_param()}}, {{util.g_ctx_param()}}) {
     {
         ocrEdtTemplateCreate(&edtTemplateGuid, _finalizerEdt, 0, 2);
         ocrGuid_t deps[] = { {{util.g_ctx_var()}}->_guids.self, {{util.g_ctx_var()}}->_guids.awaitTag };
+        ocrHint_t _hint;
         ocrEdtCreate(&finalEdtGuid, edtTemplateGuid,
             /*paramc=*/EDT_PARAM_DEF, /*paramv=*/NULL,
             /*depc=*/EDT_PARAM_DEF, /*depv=*/deps,
             /*properties=*/EDT_PROP_FINISH,
-            /*affinity=*/_affinity, /*outEvent=*/&outEventGuid);
+            /*hint=*/_cncEdtAffinityHint(&_hint, _affinity),
+            /*outEvent=*/&outEventGuid);
         ocrEdtTemplateDestroy(edtTemplateGuid);
         // hook the graph's finalizedEvent into the finalizer's output event
         ocrAddDependence(outEventGuid, {{util.g_ctx_var()}}->_guids.finalizedEvent, 0, DB_DEFAULT_MODE);
@@ -251,11 +261,13 @@ void {{g.name}}_launch({{util.g_args_param()}}, {{util.g_ctx_param()}}) {
     {
         ocrEdtTemplateCreate(&edtTemplateGuid, _graphFinishedEdt, 0, 2);
         ocrGuid_t deps[] = { {{util.g_ctx_var()}}->_guids.quiescedEvent, {{util.g_ctx_var()}}->_guids.finalizedEvent };
+        ocrHint_t _hint;
         ocrEdtCreate(&doneEdtGuid, edtTemplateGuid,
             /*paramc=*/EDT_PARAM_DEF, /*paramv=*/NULL,
             /*depc=*/EDT_PARAM_DEF, /*depv=*/deps,
             /*properties=*/EDT_PROP_NONE,
-            /*affinity=*/_affinity, /*outEvent=*/&outEventGuid);
+            /*hint=*/_cncEdtAffinityHint(&_hint, _affinity),
+            /*outEvent=*/&outEventGuid);
         ocrEdtTemplateDestroy(edtTemplateGuid);
         ocrAddDependence(outEventGuid, {{util.g_ctx_var()}}->_guids.doneEvent, 0, DB_DEFAULT_MODE);
     }

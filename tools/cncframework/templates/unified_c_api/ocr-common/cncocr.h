@@ -13,6 +13,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if !(OCR_MAJOR_VERSION >= 1 && OCR_MINOR_VERSION >= 1)
+#error "This version of CnC-OCR requires OCR version >= 1.1.0"
+#endif
+
 #if defined(__i386__) || defined(__x86_64__)
 #    define CNCOCR_x86 1
 #elif defined(TG_ARCH)

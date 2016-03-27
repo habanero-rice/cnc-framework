@@ -53,7 +53,7 @@ static void _cncItemCollUpdateRemote(cncItemCollHandle_t handle, cncTag_t *tag, 
     struct _cncItemCollUpdateParams *p;
     const ocrGuid_t remoteCtx = handle.remoteCtxGuid;
     const ocrGuid_t affinity = _cncAffinityFromCtx(remoteCtx);
-    if (affinity == _cncCurrentAffinity()) {
+    if (ocrGuidIsEq(affinity, _cncCurrentAffinity())) {
         return; // the local update took care of it
     }
     if (role == _CNC_GETTER_ROLE) {
@@ -63,11 +63,12 @@ static void _cncItemCollUpdateRemote(cncItemCollHandle_t handle, cncTag_t *tag, 
         const u32 argsSize = sizeof(input) / sizeof(u64);
         // FIXME - should just set up this template somewhere once...
         ocrEdtTemplateCreate(&tmpl, _cncCopyRemoteItem, argsSize, 1);
+        ocrHint_t hint;
         ocrEdtCreate(&target, tmpl,
                 /*paramc=*/EDT_PARAM_DEF, /*paramv=*/(u64*)&input,
                 /*depc=*/EDT_PARAM_DEF, /*depv=*/NULL,
                 /*properties=*/EDT_PROP_NONE,
-                /*affinity=*/_cncCurrentAffinity(), /*outEvent=*/NULL);
+                /*hint=*/_cncCurrentEdtAffinityHint(&hint), /*outEvent=*/NULL);
         ocrEdtTemplateDestroy(tmpl);
     }
     else {
@@ -88,11 +89,13 @@ static void _cncItemCollUpdateRemote(cncItemCollHandle_t handle, cncTag_t *tag, 
         ocrGuid_t tmpl, edt;
         // FIXME - should just set up this template somewhere once...
         ocrEdtTemplateCreate(&tmpl, _cncItemCollUpdateEdt, 0, 2);
+        ocrHint_t hint;
         ocrEdtCreate(&edt, tmpl,
                 /*paramc=*/0, /*paramv=*/NULL,
                 /*depc=*/EDT_PARAM_DEF, /*depv=*/NULL,
                 /*properties=*/EDT_PROP_NONE,
-                /*affinity=*/affinity, /*outEvent=*/NULL);
+                /*hint=*/_cncEdtAffinityHint(&hint, affinity),
+                /*outEvent=*/NULL);
         ocrAddDependence(pGuid, edt, 0, DB_MODE_RO);
         ocrAddDependence(remoteCtx, edt, 1, DB_MODE_RO);
         ocrEdtTemplateDestroy(tmpl);
@@ -105,7 +108,7 @@ void _cncItemCollUpdate(cncItemCollHandle_t handle, cncTag_t *tag, u32 tagLength
     ocrGuid_t placeholder = _cncItemCollUpdateLocal(handle.coll, tag, tagLength, role, input, slot, mode);
     // Remote lookup for gets only if local get failed
     if (role == _CNC_GETTER_ROLE) {
-        if (placeholder != NULL_GUID) {
+        if (!ocrGuidIsNull(placeholder)) {
             _cncItemCollUpdateRemote(handle, tag, tagLength, role, placeholder, 0, mode);
         }
     }
