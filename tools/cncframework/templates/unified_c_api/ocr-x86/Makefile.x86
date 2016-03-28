@@ -38,6 +38,9 @@ ifndef OCR_CONFIG
 OCR_CONFIG           := generated.cfg
 CONFIG_NUM_THREADS   ?= 4
 OCR_GENERATED_CONFIG := $(WORKLOAD_INSTALL)/$(OCR_CONFIG)
+{% if g.hasTuning('priority') -%}
+CONFIG_FLAGS := --scheduler=PRIORITY
+{% endif -%}
 endif #OCR_CONFIG
 
 WORKLOAD_ARGS ?=

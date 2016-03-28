@@ -1,0 +1,3 @@
+[ above ]:  { distfn: (j / 16) % $RANKS };
+[ left ]:   { distfn: (j / 16) % $RANKS };
+( swStep ): { distfn: (j / 16) % $RANKS };

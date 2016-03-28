@@ -84,6 +84,16 @@ static void cncPrescribeInternal_{{stepfun.collName}}({{
           (rectangular) case might be possible. */ -#}
     u64 _depc = {{stepfun.inputCountExpr}} + {{ 1 if paramTag else 2 }};
     ocrHint_t _hint;
+    {% if g.hasTuning('priority') -%}
+    ocrHint_t *const _hintPtr = &_hint;
+    if (!_cncCurrentEdtAffinityHint(_hintPtr)) {
+        ocrHintInit(_hintPtr, OCR_HINT_EDT_T);
+    }
+    s64 _priorityWeight = {{g.priorityFn(stepfun.collName, util.g_ctx_var()~"->_affinityCount")}};
+    ocrSetHintValue(_hintPtr, OCR_HINT_EDT_PRIORITY, _priorityWeight);
+    {%- else -%}
+    ocrHint_t *const _hintPtr = _cncCurrentEdtAffinityHint(&_hint);
+    {%- endif %}
     ocrEdtCreate(&_stepGuid, {{util.g_ctx_var()}}->_steps.{{stepfun.collName}},
         {% if paramTag -%}
         /*paramc=*/{{(stepfun.tag|count)}}, /*paramv=*/_tag,
@@ -92,7 +102,7 @@ static void cncPrescribeInternal_{{stepfun.collName}}({{
         {% endif -%}
         /*depc=*/_depc, /*depv=*/NULL,
         /*properties=*/EDT_PROP_NONE,
-        /*hint=*/_cncCurrentEdtAffinityHint(&_hint), /*outEvent=*/NULL);
+        /*hint=*/_hintPtr, /*outEvent=*/NULL);
 
     s32 _edtSlot = 0; MAYBE_UNUSED(_edtSlot);
     ocrAddDependence({{util.g_ctx_var()}}->_guids.self, _stepGuid, _edtSlot++, DB_MODE_RO);
