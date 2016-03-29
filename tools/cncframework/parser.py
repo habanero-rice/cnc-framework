@@ -127,8 +127,9 @@ cArraySuffix = "[" + cExpr('arraySize') + closing("]")
 # Context struct fields declaration
 # (used to add custom parameters to the context)
 
-cncContext = CaselessKeyword("$context").suppress() + Suppress("{")\
-           + cExpr('fields') + closing("}").suppress() + delimiter(";").suppress();
+cncContext = ( CaselessKeyword("$context").suppress() + Suppress("{")
+             + cExpr('fields') + closing("}").suppress()
+             + delimiter(";").suppress() )
 
 
 ##################################################
@@ -259,11 +260,11 @@ stepName = cVar | initFnName | CaselessKeyword("$finalize")
 stepDecl = Group("(" + stepName('collName') + delimiter(":")
                 + tagDecl('tag') + closing(")"))
 
-stepRelation = (Group(stepDecl('step') \
-                     + Optional(delimiter("<-") + condItemRefs('inputs')) \
-                     + Optional(delimiter("->") + condInstanceRefs('outputs'))
-                     + delimiter(";"))
-                | failure("Expected step function declaration"))
+stepRelation = ( Group(stepDecl('step')
+                      + Optional(delimiter("<-") + condItemRefs('inputs'))
+                      + Optional(delimiter("->") + condInstanceRefs('outputs'))
+                      + delimiter(";"))
+               | failure("Expected step function declaration") )
 
 
 ##################################################

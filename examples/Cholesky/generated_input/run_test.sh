@@ -15,7 +15,7 @@ fi
 [ -d "cnc_support" ] || "${UCNC_BIN}/ucnc_t"
 
 # Build
-make || exit 1
+make install || exit 1
 
 PREFIX="Result matrix checksum"
 EXPECTED="$PREFIX: d5ff728615a593f"

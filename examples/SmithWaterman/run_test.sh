@@ -18,7 +18,7 @@ fi
 [ -d "cnc_support" ] || "${UCNC_ROOT}/bin/ucnc_t"
 
 # Build
-make || exit 1
+make install || exit 1
 
 DATA_DIR="${XSTG_ROOT}/apps/apps/smithwaterman/datasets"
 
