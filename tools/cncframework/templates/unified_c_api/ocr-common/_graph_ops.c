@@ -59,7 +59,10 @@ pthread_mutex_t _cncDebugMutex = PTHREAD_MUTEX_INITIALIZER;
             else {
                 ocrHint_t hint;
                 // IMPORTANT! We do NOT use _CNC_DBCREATE here because we do NOT want DB_PROP_SINGLE_ASSIGNMENT
-                ocrDbCreate(&{{util.g_ctx_var()}}->_affinities[i], &data, ctxBytes, DB_PROP_NO_ACQUIRE,
+                // Should be usiing DB_PROP_NO_ACQUIRE, but it's not working right now... (issue #933)
+                // const u16 flags = DB_PROP_NO_ACQUIRE;
+                const u16 flags = DB_PROP_NONE;
+                ocrDbCreate(&{{util.g_ctx_var()}}->_affinities[i], &data, ctxBytes, flags,
                         _cncDbAffinityHint(&hint, a), NO_ALLOC);
             }
         }
