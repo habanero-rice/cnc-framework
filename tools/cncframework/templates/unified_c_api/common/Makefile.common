@@ -55,6 +55,7 @@ SRCS := Main.c {{g.name}}.c $(CNC_STEP_SRCS)
 -include {{g.name}}_overrides.mk
 
 CFLAGS += $(IFLAGS) $(OPT_FLAGS) -Wall $(CC_OPTS)
+{% block xtra_cflags %}{% endblock -%}
 OBJS += $(SRCS:%.c=$(WORKLOAD_BUILD)/%.o)
 {% block xtra_objs %}{% endblock %}
 

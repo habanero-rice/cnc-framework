@@ -72,6 +72,7 @@ SRCS := Main.c {{g.name}}.c
 # all OCR required includes and apps/libs/<target>/include
 # TG_ARCH is also defined for Fsim
 CFLAGS += -I$(WORKLOAD_SRC) -I$(WORKLOAD_SRC)/cnc_support/$(OCR_TYPE)
+CFLAGS += -DOCR_TYPE_H="$(OCR_TYPE).h"
 
 # Enable CnC debug trace messages
 #CFLAGS += -DCNC_DEBUG_TRACE=1

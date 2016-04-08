@@ -39,7 +39,7 @@ OCR_CONFIG           := generated.cfg
 CONFIG_NUM_THREADS   ?= 4
 OCR_GENERATED_CONFIG := $(WORKLOAD_INSTALL)/$(OCR_CONFIG)
 {% if g.hasTuning('priority') -%}
-CONFIG_FLAGS := --scheduler=PRIORITY
+CONFIG_FLAGS += --scheduler=PRIORITY
 {% endif -%}
 endif #OCR_CONFIG
 
@@ -53,6 +53,10 @@ WORKLOAD_INPUT_FILE_IDX ?= 0
 SRCS += $(patsubst %,$(CNC_SUPPORT_DIR)/%.c,cncocr cnc_common cncocr_itemcoll)
 SRCS += $(patsubst %,$(CNC_SUPPORT_DIR)/{{g.name}}_%_ops.c,step item graph)
 {% endblock xtra_srcs %}
+
+{% block xtra_cflags -%}
+CFLAGS += -DOCR_TYPE_H="$(OCR_TYPE).h"
+{% endblock xtra_cflags %}
 
 {% block xtra_o_deps %}| $(OCR_AR){% endblock %}
 
@@ -71,7 +75,7 @@ $(OCR_AR):
 ifdef OCR_GENERATED_CONFIG
 $(OCR_GENERATED_CONFIG):
 	$(ensure_dir)
-	$(OCR_INSTALL_ROOT)/share/ocr/scripts/Configs/config-generator.py $(CONFIG_FLAGS){% block xtra_config_flags %}{% endblock %} --threads $(CONFIG_NUM_THREADS) --remove-destination --output $@
+	$(OCR_INSTALL_ROOT)/share/ocr/scripts/Configs/config-generator.py {% block xtra_config_flags %}{% endblock %} --threads $(CONFIG_NUM_THREADS) --remove-destination $(CONFIG_FLAGS) --output $@
 endif #OCR_GENERATED_CONFIG
 {% endblock xtra_targets %}
 
