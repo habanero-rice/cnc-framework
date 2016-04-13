@@ -14,70 +14,28 @@ struct _cncItemCollUpdateParams {
     cncTag_t tag[];
 };
 
-{#/* This should basically be identical to _cncItemCollUpdateLocal in the parent */-#}
-// FIXME - refactor to reuse _cncItemCollUpdateLocal
 static ocrGuid_t _cncItemCollUpdateEdt(u32 paramc, u64 paramv[], u32 depc, ocrEdtDep_t depv[]) {
     struct _cncItemCollUpdateParams *p = depv[0].ptr;
     u8 *ctxBase = depv[1].ptr;
     cncItemCollection_t *coll = (void*)(ctxBase + p->collOffset);
-    _cncItemCollectionEntry *entry;
-    _allocateEntryIfAbsent(*coll, p->tag, p->tagLength, p->role, &entry);
-
-    if (p->role == _CNC_PUTTER_ROLE) { // put input into collection
-        ocrEventSatisfy(entry->event, p->input);
-    }
-    else { // get placeholder and pass to input
-        ocrAddDependence(entry->event, p->input, p->slot, p->mode);
-    }
+    ocrGuid_t result = _cncItemCollUpdateLocal(*coll, p->tag, p->tagLength, p->role, p->input, p->slot, p->mode);
     ocrDbDestroy(depv[0].guid);
-    return NULL_GUID;
-}
-
-static ocrGuid_t _cncCopyRemoteItem(u32 paramc, u64 paramv[], u32 depc, ocrEdtDep_t depv[]) {
-    ocrGuid_t *placeholder = (ocrGuid_t *)paramv;
-    CnCItemMeta *remote = depv[0].ptr;
-    if (remote) {
-        void *local = cncItemAlloc(remote->size);
-        memcpy(local, remote->data, remote->size);
-        ocrEventSatisfy(*placeholder, _cncItemGuid(local));
-    }
-    else {
-        ocrEventSatisfy(*placeholder, NULL_GUID);
-    }
-    return NULL_GUID;
+    return result;
 }
 
 static void _cncItemCollUpdateRemote(cncItemCollHandle_t handle, cncTag_t *tag, u32 tagLength, u8 role,
         ocrGuid_t input, u32 slot, ocrDbAccessMode_t mode) {
-    ocrGuid_t pGuid, target;
+    ocrGuid_t pGuid;
     struct _cncItemCollUpdateParams *p;
     const ocrGuid_t remoteCtx = handle.remoteCtxGuid;
     const ocrGuid_t affinity = _cncAffinityFromCtx(remoteCtx);
     if (ocrGuidIsEq(affinity, _cncCurrentAffinity())) {
         return; // the local update took care of it
     }
-    if (role == _CNC_GETTER_ROLE) {
-        // set up an EDT to make a local copy of the remote item
-        // do a remote update to set the input-dependence on the item-copying EDT
-        ocrGuid_t tmpl;
-        const u32 argsSize = sizeof(input) / sizeof(u64);
-        // FIXME - should just set up this template somewhere once...
-        ocrEdtTemplateCreate(&tmpl, _cncCopyRemoteItem, argsSize, 1);
-        ocrHint_t hint;
-        ocrEdtCreate(&target, tmpl,
-                /*paramc=*/EDT_PARAM_DEF, /*paramv=*/(u64*)&input,
-                /*depc=*/EDT_PARAM_DEF, /*depv=*/NULL,
-                /*properties=*/EDT_PROP_NONE,
-                /*hint=*/_cncCurrentEdtAffinityHint(&hint), /*outEvent=*/NULL);
-        ocrEdtTemplateDestroy(tmpl);
-    }
-    else {
-        target = input;
-    }
     { // init params struct
         const size_t tagBytes = tagLength*sizeof(*tag);
         _CNC_DBCREATE(&pGuid, (void**)&p, sizeof(*p) + tagBytes);
-        p->input = target;
+        p->input = input;
         p->collOffset = handle.collOffset;
         p->role = role;
         p->tagLength = tagLength;
