@@ -31,7 +31,10 @@
 #define CNC_TABLE_SIZE 1024
 #endif
 
-#define _CNC_ITEM_MODE DB_MODE_RW
+#define _CNC_AUX_DATA_MODE DB_MODE_RO
+#define _CNC_ITEM_GET_MODE DB_MODE_RO
+#define _CNC_ITEM_PUT_MODE DB_MODE_NULL
+
 #define _CNC_DBCREATE(guid, ptr, sz) _CNC_DBCREATE_PLACED(guid, ptr, sz, NULL_HINT)
 #define _CNC_DBCREATE_PLACED(guid, ptr, sz, loc) ocrDbCreate(guid, ptr, sz, DB_PROP_SINGLE_ASSIGNMENT, loc, NO_ALLOC)
 
@@ -70,7 +73,7 @@ void _cncItemCollUpdate(cncItemCollHandle_t handle, cncTag_t *tag, u32 tagLength
 
 /* Putting an item into the hashmap */
 static inline void _cncPut(ocrGuid_t item, cncTag_t *tag, int tagLength, cncItemCollHandle_t handle) {
-    _cncItemCollUpdate(handle, tag, tagLength, _CNC_PUTTER_ROLE, item, 0, _CNC_ITEM_MODE);
+    _cncItemCollUpdate(handle, tag, tagLength, _CNC_PUTTER_ROLE, item, 0, _CNC_ITEM_PUT_MODE);
 }
 
 /* Get GUID from an item tag */

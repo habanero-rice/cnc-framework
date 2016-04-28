@@ -230,7 +230,7 @@ void {{g.name}}_launch({{util.g_args_param()}}, {{util.g_ctx_param()}}) {
                 /*outEvent=*/&outEventGuid);
         ocrEdtTemplateDestroy(edtTemplateGuid);
         // hook the graph's quiescedEvent into the graph's output event
-        ocrAddDependence(outEventGuid, {{util.g_ctx_var()}}->_guids.quiescedEvent, 0, DB_DEFAULT_MODE);
+        ocrAddDependence(outEventGuid, {{util.g_ctx_var()}}->_guids.quiescedEvent, 0, DB_MODE_NULL);
         // don't start until the context is fully initialized
         ocrAddDependence({{util.g_ctx_var()}}->_guids.contextReady, graphEdtGuid, 0, DB_MODE_NULL);
     }
@@ -258,7 +258,7 @@ void {{g.name}}_launch({{util.g_args_param()}}, {{util.g_ctx_param()}}) {
             /*outEvent=*/&outEventGuid);
         ocrEdtTemplateDestroy(edtTemplateGuid);
         // hook the graph's finalizedEvent into the finalizer's output event
-        ocrAddDependence(outEventGuid, {{util.g_ctx_var()}}->_guids.finalizedEvent, 0, DB_DEFAULT_MODE);
+        ocrAddDependence(outEventGuid, {{util.g_ctx_var()}}->_guids.finalizedEvent, 0, DB_MODE_NULL);
     }
     // set up the EDT that controls the graph's doneEvent
     {
@@ -272,7 +272,7 @@ void {{g.name}}_launch({{util.g_args_param()}}, {{util.g_ctx_param()}}) {
             /*hint=*/_cncEdtAffinityHint(&_hint, _affinity),
             /*outEvent=*/&outEventGuid);
         ocrEdtTemplateDestroy(edtTemplateGuid);
-        ocrAddDependence(outEventGuid, {{util.g_ctx_var()}}->_guids.doneEvent, 0, DB_DEFAULT_MODE);
+        ocrAddDependence(outEventGuid, {{util.g_ctx_var()}}->_guids.doneEvent, 0, DB_MODE_NULL);
     }
     // start the graph execution
     ocrAddDependence(argsDbGuid, graphEdtGuid, 1, DB_DEFAULT_MODE);

@@ -105,9 +105,9 @@ static void cncPrescribeInternal_{{stepfun.collName}}({{
         /*hint=*/_hintPtr, /*outEvent=*/NULL);
 
     s32 _edtSlot = 0; MAYBE_UNUSED(_edtSlot);
-    ocrAddDependence({{util.g_ctx_var()}}->_guids.self, _stepGuid, _edtSlot++, DB_MODE_RO);
+    ocrAddDependence({{util.g_ctx_var()}}->_guids.self, _stepGuid, _edtSlot++, _CNC_AUX_DATA_MODE);
     {% if not paramTag -%}
-    ocrAddDependence(_tagGuid, _stepGuid, _edtSlot++, DB_MODE_RO);
+    ocrAddDependence(_tagGuid, _stepGuid, _edtSlot++, _CNC_AUX_DATA_MODE);
     {% endif -%}
 
     {#-/****** Set up input items *****/#}
@@ -137,9 +137,9 @@ else {
 {%- if inputIsEnabled[-1] -%}
 cncGet_{{input.collName}}(
         {%- for k in input.key %}_i{{loop.index0}}, {% endfor -%}
-         _stepGuid, _edtSlot++, DB_DEFAULT_MODE, {{util.g_ctx_var()}});
+         _stepGuid, _edtSlot++, _CNC_ITEM_GET_MODE, {{util.g_ctx_var()}});
 {%- else -%}
-ocrAddDependence(NULL_GUID, _stepGuid, _edtSlot++, DB_DEFAULT_MODE);
+ocrAddDependence(NULL_GUID, _stepGuid, _edtSlot++, DB_MODE_NULL);
 {%- endif -%}
 {%- endcall -%}
 {% endif %}

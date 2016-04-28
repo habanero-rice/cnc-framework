@@ -23,15 +23,26 @@ static ocrGuid_t _cncItemCollUpdateEdt(u32 paramc, u64 paramv[], u32 depc, ocrEd
     return result;
 }
 
-static void _cncItemCollUpdateRemote(cncItemCollHandle_t handle, cncTag_t *tag, u32 tagLength, u8 role,
+void _cncItemCollUpdate(cncItemCollHandle_t handle, cncTag_t *tag, u32 tagLength, u8 role,
         ocrGuid_t input, u32 slot, ocrDbAccessMode_t mode) {
     ocrGuid_t pGuid;
     struct _cncItemCollUpdateParams *p;
     const ocrGuid_t remoteCtx = handle.remoteCtxGuid;
     const ocrGuid_t affinity = _cncAffinityFromCtx(remoteCtx);
-    if (ocrGuidIsEq(affinity, _cncCurrentAffinity())) {
-        return; // the local update took care of it
+    const bool isLocalOp = ocrGuidIsEq(affinity, _cncCurrentAffinity());
+    // Handle local operations
+    if (isLocalOp) {
+        _cncItemCollUpdateLocal(handle.coll, tag, tagLength, role, input, slot, mode);
+        return;
     }
+    if (role == _CNC_GETTER_ROLE) {
+        // Remote lookup for gets only if local get failed
+        ocrGuid_t placeholder = _cncItemCollUpdateLocal(handle.coll, tag, tagLength, role, input, slot, mode);
+        if (ocrGuidIsNull(placeholder)) { return; } // already registered on remote
+        input = placeholder;
+        slot = 0;
+    }
+    // Handle remote operations
     { // init params struct
         const size_t tagBytes = tagLength*sizeof(*tag);
         _CNC_DBCREATE(&pGuid, (void**)&p, sizeof(*p) + tagBytes);
@@ -57,24 +68,6 @@ static void _cncItemCollUpdateRemote(cncItemCollHandle_t handle, cncTag_t *tag, 
         ocrAddDependence(pGuid, edt, 0, DB_MODE_RO);
         ocrAddDependence(remoteCtx, edt, 1, DB_MODE_RO);
         ocrEdtTemplateDestroy(tmpl);
-    }
-}
-
-void _cncItemCollUpdate(cncItemCollHandle_t handle, cncTag_t *tag, u32 tagLength, u8 role, ocrGuid_t input,
-        u32 slot, ocrDbAccessMode_t mode) {
-    // do local item collection update first
-    ocrGuid_t placeholder = _cncItemCollUpdateLocal(handle.coll, tag, tagLength, role, input, slot, mode);
-    // Remote lookup for gets only if local get failed
-    if (role == _CNC_GETTER_ROLE) {
-        if (!ocrGuidIsNull(placeholder)) {
-            _cncItemCollUpdateRemote(handle, tag, tagLength, role, placeholder, 0, mode);
-        }
-    }
-    // Always remote update for puts
-    else {
-        // FIXME - possible memory leak if the placeholder already exists and we do this put,
-        // since it's going to create a copy later...
-        _cncItemCollUpdateRemote(handle, tag, tagLength, role, input, slot, mode);
     }
 }
 
