@@ -89,10 +89,19 @@ class UnifiedTranslator(object):
         self.arg_parser.add_argument("specfile", nargs='?', default="", help="CnC graph spec file")
         # parse the args
         self.args = self.arg_parser.parse_args()
+        # allow override for generic OCR platform
+        if self.args.platform == "ocr":
+            ocr_type = os.environ.get('OCR_TYPE')
+            if ocr_type:
+                print "Overriding default platform via OCR_TYPE environment variable:", ocr_type
+                self.args.platform = {
+                    "x86": "ocr/x86",
+                    "x86-mpi": "ocr/mpi",
+                    "tg": "ocr/tg"
+                }.get(ocr_type, ocr_type)
         # check platform name
-        #if not re.match(r'^(?P<runtime>[^/]+)(?:/(?P<conduit>.+))?$', self.args.platform):
         if not self.args.platform in platforms:
-            die("ERROR! Invalid platform name: " + self.args.platform)
+            self.die("ERROR! Invalid platform name: " + self.args.platform)
         # find default spec file
         if not self.args.specfile:
             specs = glob.glob("*.cnc")
