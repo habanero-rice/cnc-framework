@@ -25,7 +25,7 @@ void SmithWaterman_swStep(cncTag_t i, cncTag_t j, SeqData *data, int *above, int
     }
     else {
         for (ii = 0; ii <= ctx->th; ii++) {
-            curr_tile[ii][0] = GAP_PENALTY * (i*ctx->th + ii);
+            curr_tile[ii][0] = 0;
         }
     }
 
@@ -37,7 +37,7 @@ void SmithWaterman_swStep(cncTag_t i, cncTag_t j, SeqData *data, int *above, int
     }
     else {
         for (jj = 0; jj <= ctx->th; jj++) {
-            curr_tile[0][jj] = GAP_PENALTY * (j*ctx->tw + jj);
+            curr_tile[0][jj] = 0;
         }
     }
 

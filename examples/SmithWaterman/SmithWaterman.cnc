@@ -24,7 +24,7 @@ $context {
        [ left: i, j ]  $when(j > 0)
     -> [ below @ above: i+1, j ],
        [ right @ left:  i, j+1 ],
-       ( swStep: i+i, j ) $when(i+1 < #nth);
+       ( swStep: i+1, j ) $when(i+1 < #nth);
 
 // Write graph inputs and start steps
 ( $initialize: () )

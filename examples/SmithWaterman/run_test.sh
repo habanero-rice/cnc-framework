@@ -37,7 +37,7 @@ DIM1=$((569))
 DIM2=$((661))
 
 echo "Testing string1-large.txt vs string2-large.txt with width=${DIM1}, height=${DIM2}"
-make run WORKLOAD_ARGS="${DIM1} ${DIM2} ${DATA_DIR}/string1-large.txt ${DATA_DIR}/string2-large.txt" 2>&1 | tee $TMPFILE && fgrep -q 'score: 65386' < $TMPFILE
+make run WORKLOAD_ARGS="${DIM1} ${DIM2} ${DATA_DIR}/string1-large.txt ${DATA_DIR}/string2-large.txt" 2>&1 | tee $TMPFILE && fgrep -q 'score: 65388' < $TMPFILE
 RET2=$?
 [ $RET2 = 0 ] && echo OK || echo FAIL
 
