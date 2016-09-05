@@ -30,4 +30,4 @@ s`/. TODO: Add struct members.`int n;`;
 /^ *\*/d
 }' EvenOddSums_defs.h
 
-rm *.c.bak
+rm *.c.bak *.h.bak

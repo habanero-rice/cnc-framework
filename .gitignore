@@ -1,4 +1,14 @@
+# Python toolchain
 *.pyc
 tools/py/*
 !tools/py/bootstrap.sh
-*.o
+
+# Build directories
+build/
+install/
+cnc_support/
+
+# Generated test files
+/test/**/*.[ch]
+/test/**/Makefile*
+/test/test.log
