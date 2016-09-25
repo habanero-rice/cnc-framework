@@ -283,7 +283,9 @@ class CnCGraph(object):
         # set up step attribute lookup dict
         self.stepLikes = OrderedDict(self.stepFunctions)
         self.stepLikes[self.initFunction.collName] = self.initFunction
+        self.stepLikes["$init"] = self.initFunction
         self.stepLikes[self.finalizeFunction.collName] = self.finalizeFunction
+        self.stepLikes["$finalize"] = self.finalizeFunction
         # attribute tracking
         self.allAttrNames = set()
         # context

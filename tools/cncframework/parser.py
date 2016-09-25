@@ -288,7 +288,7 @@ def parseGraphFile(specPath):
 itemTune = Group("[" + cVar('collName') + closing("]") + delimiter(":")
                 + attrDict('attrs') + delimiter(";"))
 inputTune = delimiter("<-") + "[" + cVar('inputName') + closing("]")
-stepTune = Group("(" + cVar('collName') + closing(")") + Optional(inputTune)
+stepTune = Group("(" + stepName('collName') + closing(")") + Optional(inputTune)
                 + delimiter(":") + attrDict('attrs') + delimiter(";"))
 
 itemTunings = ZeroOrMore(itemTune)('itemTunings')

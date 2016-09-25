@@ -46,7 +46,9 @@ void Cholesky_cncInitialize(CholeskyArgs *args, CholeskyCtx *ctx) {
     }
 
     for (i=0; i<N; i++) {
-        cncPrescribe_C(i, ctx);
+        if (i != 0) {
+            cncPrescribe_C(i, ctx);
+        }
         for (r=i+1; r<N; r++) {
             cncPrescribe_T(i, r, ctx);
             for (c=i+1; c<=r; c++) {
@@ -60,6 +62,9 @@ void Cholesky_cncInitialize(CholeskyArgs *args, CholeskyCtx *ctx) {
     gettimeofday(&startTime, 0);
 #endif
 
+    // START!
+    cncPrescribe_C(0, ctx);
+
     // Set up finalizer
     Cholesky_await(ctx);
 }
@@ -68,7 +73,7 @@ void Cholesky_cncInitialize(CholeskyArgs *args, CholeskyCtx *ctx) {
 /*
  * typeof results is double *
  */
-void Cholesky_cncFinalize(double *results, CholeskyCtx *ctx) {
+void Cholesky_cncFinalize(double *results1D, CholeskyCtx *ctx) {
 #if !CNCOCR_TG
     // Report the total running time
     struct timeval endTime;
@@ -79,13 +84,15 @@ void Cholesky_cncFinalize(double *results, CholeskyCtx *ctx) {
 #endif
     // Print the result matrix row-by-row (requires visiting each tile t times)
     const int t = ctx->tileSize;
-    const int last_i = t * t;
     u64 checksum = 0;
     union { double d; u64 u; } tmpUnion;
-    int i;
-    for (i = 0; i < last_i; i++) {
-        tmpUnion.d = results[i];
-        checksum += tmpUnion.u;
+    double (*results)[t] = (double(*)[t])results1D;
+    int r, c;
+    for (r = 0; r < t; r++) {
+        for (c = 0; c <= r; c++) {
+            tmpUnion.d = results[r][c];
+            checksum += tmpUnion.u;
+        }
     }
     printf("Result matrix checksum: %lx\n", checksum);
 }

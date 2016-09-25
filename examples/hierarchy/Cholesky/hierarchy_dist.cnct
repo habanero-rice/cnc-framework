@@ -1,0 +1,10 @@
+[ MC ]: { distfn: distC(i-1) % $RANKS };
+[ MT ]: { distfn: distT(i-1, r) % $RANKS };
+[ MU ]: { distfn: distU(i-1, r, c) % $RANKS };
+
+( C ): { distfn: distC(i) % $RANKS };
+( T ): { distfn: distT(i, r) % $RANKS };
+( U ): { distfn: distU(i, r, c) % $RANKS };
+
+( $initialize ): { distfn: 0 };
+( $finalize ): { distfn: 0 };
