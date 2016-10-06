@@ -9,6 +9,10 @@
 {% block platform_flags %}
 CFLAGS += -DCNC_DISTRIBUTED=1
 
+# Use MPI compiler by default
+CC = mpicc
+CXX = mpicxx
+
 # Distributed (MPI)
 ifdef OCR_NODEFILE
   MPI_FLAGS := --machinefile $(OCR_NODEFILE)
