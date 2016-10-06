@@ -59,11 +59,13 @@ pthread_mutex_t _cncDebugMutex = PTHREAD_MUTEX_INITIALIZER;
             else {
                 ocrHint_t hint;
                 // IMPORTANT! We do NOT use _CNC_DBCREATE here because we do NOT want DB_PROP_SINGLE_ASSIGNMENT
-                // Should be usiing DB_PROP_NO_ACQUIRE, but it's not working right now... (issue #933)
+                // XXX - Should be usiing DB_PROP_NO_ACQUIRE, but it's not working right now... (issue #933)
                 // const u16 flags = DB_PROP_NO_ACQUIRE;
                 const u16 flags = DB_PROP_NONE;
                 ocrDbCreate(&{{util.g_ctx_var()}}->_affinities[i], &data, ctxBytes, flags,
                         _cncDbAffinityHint(&hint, a), NO_ALLOC);
+                // XXX - shouldn't need this release because we should be using NO_ACQUIRE (see comment above)
+                ocrDbRelease(ctx->_affinities[i]);
             }
         }
     }
@@ -250,7 +252,6 @@ void {{g.name}}_launch({{util.g_args_param()}}, {{util.g_ctx_param()}}) {
         #endif /* CNC_AFFINITIES */
         ocrEventSatisfySlot({{util.g_ctx_var()}}->_guids.contextReady, NULL_GUID, OCR_EVENT_LATCH_DECR_SLOT);
     }
-    ocrDbRelease({{util.g_ctx_var()}}->_guids.self);
     // set up the finalizer
     {
         ocrEdtTemplateCreate(&edtTemplateGuid, _finalizerEdt, 0, 2);
@@ -282,7 +283,9 @@ void {{g.name}}_launch({{util.g_args_param()}}, {{util.g_ctx_param()}}) {
     }
     // start the graph execution
     ocrAddDependence(argsDbGuid, graphEdtGuid, 1, DB_DEFAULT_MODE);
-    ocrAddDependence({{util.g_ctx_var()}}->_guids.self, graphEdtGuid, 2, DB_DEFAULT_MODE);
+    ocrGuid_t selfCtxGuid = {{util.g_ctx_var()}}->_guids.self;
+    ocrDbRelease(selfCtxGuid);
+    ocrAddDependence(selfCtxGuid, graphEdtGuid, 2, DB_DEFAULT_MODE);
 }
 
 void {{g.name}}_await({{
