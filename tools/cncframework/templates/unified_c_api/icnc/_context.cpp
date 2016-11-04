@@ -135,11 +135,11 @@ extern "C" {
     void cncPrescribe_{{stepfun.collName}}({{
             util.print_tag(stepfun.tag, typed=True)
             }}{{util.g_ctx_param()}}) {
-        {% if stepfun.tag -%}
+        {% if stepfun.isSingleton -%}
+        cncAggregateTag_t &_tag = _cncSingletonTag;
+        {% else %}
         cncTag_t _init[] = { {{ stepfun.tag|join(", ") }} };
         cncAggregateTag_t _tag(_init, {{stepfun.tag|count}});
-        {% else %}
-        cncAggregateTag_t &_tag = _cncSingletonTag;
         {% endif %}
         _cncCppCtx({{util.g_ctx_var()}})->s_{{stepfun.collName}}.put(_tag);
         {{ util.log_msg("PRESCRIBED", stepfun.collName, stepfun.tag, indent=2) }}

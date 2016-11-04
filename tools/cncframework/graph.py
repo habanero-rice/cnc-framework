@@ -67,6 +67,7 @@ class StepRef(object):
         self.kind = 'STEP'
         self.collName = stepRef.collName
         self.tag = map(makeTagComponent, tuple(stepRef.tag))
+        self.isSingleton = len(self.tag) == 0
         self.tagRanges = tuple(x for x in self.tag if x.isRanged)
 
 
@@ -138,6 +139,7 @@ class StepFunction(object):
         stepTag = tuple(stepIO.step.tag)
         self.collName = stepIO.step.collName
         self.tag = stepTag
+        self.isSingleton = len(self.tag) == 0
         self.inputItems = []
         self.outputItems = []
         # Verify that tag bindings are unique

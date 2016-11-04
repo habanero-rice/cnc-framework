@@ -284,7 +284,9 @@ void {{g.name}}_await({{
         }}{{util.g_ctx_param()}}) {
     // Can't launch the finalizer EDT from within the finish EDT,
     // so we copy the tag information into a DB and do it indirectly.
-    {% if g.finalizeFunction.tag -%}
+    {% if g.finalizeFunction.isSingleton -%}
+    ocrGuid_t _tagGuid = NULL_GUID;
+    {% else -%}
     cncTag_t *_tagPtr;
     ocrGuid_t _tagGuid;
     int _i = 0;
@@ -293,8 +295,6 @@ void {{g.name}}_await({{
     _tagPtr[_i++] = {{x}};
     {% endfor -%}
     ocrDbRelease(_tagGuid);
-    {% else -%}
-    ocrGuid_t _tagGuid = NULL_GUID;
     {% endif -%}
     ocrEventSatisfy({{util.g_ctx_var()}}->_guids.awaitTag, _tagGuid);
 }

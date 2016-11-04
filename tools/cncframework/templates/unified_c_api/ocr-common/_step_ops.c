@@ -165,7 +165,9 @@ static ocrGuid_t _cncRemotePrescribe_{{stepfun.collName}}(u32 paramc, u64 paramv
 void cncPrescribe_{{stepfun.collName}}({{
         util.print_tag(stepfun.tag, typed=True)
         ~ util.g_ctx_param() }}) {
-    {% if stepfun.tag -%}
+    {% if stepfun.isSingleton -%}
+    u64 *_args = NULL;
+    {% else -%}
     u64 _args[] = { (u64){{ stepfun.tag|join(", (u64)") }} };
     {% if not paramTag -%}
     ocrGuid_t _tagBlockGuid;
@@ -173,8 +175,6 @@ void cncPrescribe_{{stepfun.collName}}({{
     _CNC_DBCREATE(&_tagBlockGuid, (void**)&_tagBlockPtr, sizeof(_args));
     hal_memCopy(_tagBlockPtr, _args, sizeof(_args), 0);
     {% endif -%}
-    {% else -%}
-    u64 *_args = NULL;
     {% endif -%}
     // affinity
     #ifdef CNC_AFFINITIES
