@@ -17,7 +17,7 @@ void Cholesky_sequentialStep(cncTag_t k, double *data1D, CholeskyCtx *ctx) {
     int kB, jB, jBB, iB;
     for (kB = 0 ; kB < t ; kB++) {
         CNC_REQUIRE(data[ kB ][ kB ] > 0.0,
-                    "[%ld][%d] Error: Not a symmetric positive definite (SPD) matrix\n", k, kB);
+                    "[%" PRId64 "][%d] Error: Not a symmetric positive definite (SPD) matrix\n", k, kB);
         lBlock[ kB ][ kB ] = sqrt( data[ kB ][ kB ] );
 
         for (jB = kB + 1; jB < t ; jB++)

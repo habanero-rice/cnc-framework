@@ -99,6 +99,6 @@ void Cholesky_cncFinalize(cncTag_t tileCount, struct timeval *startTime, double 
         // Increment by the number of tiles in this row
         tileIndexRowBase += tileRow + 1;
     }
-    printf("Result matrix checksum: %lx\n", checksum);
+    printf("Result matrix checksum: %" PRIx64 "\n", checksum);
 }
 
