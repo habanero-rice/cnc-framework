@@ -1,3 +1,4 @@
+import types
 from itertools import count, ifilter, imap, chain
 from sys import exit
 from string import strip
@@ -6,7 +7,9 @@ from counter import Counter
 from ordereddict import OrderedDict
 
 
-def expandExpr(x, collID="0", numRanks="CNC_NUM_RANKS"):
+def expandExpr(x, collID="0", numRanks=None):
+    if numRanks is None:
+        numRanks = "CNC_NUM_RANKS_IS_MISSING"
     return x and (str(x).strip()
                   .replace("@", "args->").replace("#", "ctx->")
                   .replace("$ID", collID).replace("$RANKS", numRanks))
@@ -215,6 +218,11 @@ class DistFn(object):
 initNameRaw = '$init'
 finalizeNameRaw = '$finalize'
 
+def nameOfCollection(coll):
+    if isinstance(coll, types.StringTypes):
+        return coll
+    return coll.collName
+
 def verifyCollectionDecls(typ, decls):
     nameCounts = Counter([ x.collName for x in decls ])
     repeated = [ name for name, n in nameCounts.iteritems() if n > 1 ]
@@ -235,7 +243,8 @@ def lastComponent(coll, defaultVal):
     else:
         return coll.key[-1] if coll.key else defaultVal
 
-def getDistFn(colls, collName, ranksExpr):
+def getDistFn(colls, coll, ranksExpr):
+    collName = nameOfCollection(coll)
     decl = colls[collName]
     collID = str(list(colls.keys()).index(collName))
     rankVar = lastComponent(decl, collID)
@@ -255,7 +264,8 @@ def getDistFn(colls, collName, ranksExpr):
         rawFn = decl.attrs.get('distfn', defaultFn)
     return expandExpr(rawFn, collID=collID, numRanks=ranksExpr)
 
-def getTuningFn(colls, collName, name, ranksExpr, default):
+def getTuningFn(colls, coll, name, ranksExpr, default):
+    collName = nameOfCollection(coll)
     decl = colls[collName]
     collID = str(list(colls.keys()).index(collName))
     rawFn = decl.attrs.get(name, default)
@@ -300,22 +310,35 @@ class CnCGraph(object):
         return self.hasTuning('distfn') or self.hasTuning('placeWith')
 
     def lookupType(self, item):
-        return self.itemDeclarations[item.collName].type
+        return self.itemDeclarations[nameOfCollection(item)].type
 
-    def itemDistFn(self, collName, ranksExpr):
-        return getDistFn(self.itemDeclarations, collName, ranksExpr)
+    def itemDistFn(self, coll, ranksExpr):
+        return getDistFn(self.itemDeclarations, nameOfCollection(coll), ranksExpr)
 
-    def stepDistFn(self, collName, ranksExpr):
-        return getDistFn(self.stepLikes, collName, ranksExpr)
+    def stepDistFn(self, coll, ranksExpr):
+        return getDistFn(self.stepLikes, nameOfCollection(coll), ranksExpr)
 
-    def itemTuningFn(self, collName, name, ranksExpr, default):
-        return getTuningFn(self.itemDeclarations, collName, name, ranksExpr, default)
+    def itemTuningFn(self, coll, name, ranksExpr, default):
+        return getTuningFn(self.itemDeclarations, nameOfCollection(coll), name, ranksExpr, default)
 
-    def stepTuningFn(self, collName, name, ranksExpr, default):
-        return getTuningFn(self.stepLikes, collName, name, ranksExpr, default)
+    def stepTuningFn(self, coll, name, ranksExpr, default):
+        return getTuningFn(self.stepLikes, nameOfCollection(coll), name, ranksExpr, default)
 
-    def priorityFn(self, collName, ranksExpr):
-        return self.stepTuningFn(collName, 'priority', ranksExpr, "0")
+    def itemDenseMappingLength(self, coll):
+        return self.itemTuningFn(nameOfCollection(coll), 'dense_length', None, None)
+
+    def itemDenseMappingFn(self, coll):
+        return self.itemTuningFn(nameOfCollection(coll), 'dense_mapping', None, None)
+
+    def itemIsDense(self, coll):
+        collName = nameOfCollection(coll)
+        length = not (self.itemDenseMappingLength(collName) is None)
+        fn = not (self.itemDenseMappingFn(collName) is None)
+        assert length == fn, "{0}: Must declare both dense_length and dense_mapping".format(collName)
+        return length and fn
+
+    def priorityFn(self, coll, ranksExpr):
+        return self.stepTuningFn(nameOfCollection(coll), 'priority', ranksExpr, "0")
 
     def addTunings(self, tuningSpec):
         for t in tuningSpec.itemTunings:
