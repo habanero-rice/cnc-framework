@@ -74,11 +74,16 @@ pthread_mutex_t _cncDebugMutex = PTHREAD_MUTEX_INITIALIZER;
 static void _initCtxColls({{util.g_ctx_param()}}) {
     // initialize item collections
     {% for i in g.concreteItems -%}
-    {% if i.key -%}
-    {{util.g_ctx_var()}}->_items.{{i.collName}} = _cncItemCollectionCreate();
+    {% with -%}
+    {% if i.isSingleton -%}
+    {% set coll_create_fn = "_cncItemCollectionSingletonCreate" -%}
+    {% elif False -%}
+    {% set coll_create_fn = "_cncItemCollectionCreate" -%}
     {% else -%}
-    {{util.g_ctx_var()}}->_items.{{i.collName}} = _cncItemCollectionSingletonCreate();
+    {% set coll_create_fn = "_cncItemCollectionCreate" -%}
     {% endif -%}
+    {{util.g_ctx_var()}}->_items.{{i.collName}} = {{ coll_create_fn }}();
+    {% endwith -%}
     {% endfor -%}
     // initialize step collections
     {% for s in g.finalAndSteps -%}

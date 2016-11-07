@@ -25,12 +25,14 @@ void cncPut_{{i.collName}}({{i.type.ptrType}}_item, {{
     const cncLocation_t _loc = CNC_CURRENT_LOCATION; MAYBE_UNUSED(_loc);
     #endif /* CNC_AFFINITIES */
     {{ util.log_msg("PUT", i.collName, i.key) }}
-    {% if i.key -%}
+    {% if i.isSingleton -%}
+    // FIXME - affinities not correctly set for singletons
+    // _cncPutSingleton(_handle, _CNC_ITEM_COLL_HANDLE({{util.g_ctx_var()}}, {{i.collName}}, _loc));
+    _cncPutSingleton(_handle, {{util.g_ctx_var()}}->_items.{{i.collName}});
+    {%- else -%}
     cncTag_t _tag[] = { {{i.key|join(", ")}} };
     const size_t _tagSize = sizeof(_tag)/sizeof(*_tag);
     _cncPut(_handle, _tag, _tagSize, _CNC_ITEM_COLL_HANDLE({{util.g_ctx_var()}}, {{i.collName}}, _loc));
-    {%- else -%}
-    _cncPutSingleton(_handle, _CNC_ITEM_COLL_HANDLE({{util.g_ctx_var()}}, {{i.collName}}, _loc));
     {%- endif %}
     {%- else -%}
     {% set targetColl = g.itemDeclarations[i.mapTarget] -%}
@@ -56,12 +58,14 @@ void cncGet_{{i.collName}}({{ util.print_tag(i.key, typed=True) }}ocrGuid_t _des
     #else
     const cncLocation_t _loc = CNC_CURRENT_LOCATION; MAYBE_UNUSED(_loc);
     #endif /* CNC_AFFINITIES */
-    {% if i.key -%}
+    {% if i.isSingleton -%}
+    // FIXME - affinities not correctly set for singletons
+    // return _cncGetSingleton(_destination, _slot, _mode, _CNC_ITEM_COLL_HANDLE({{util.g_ctx_var()}}, {{i.collName}}, _loc));
+    return _cncGetSingleton(_destination, _slot, _mode, {{util.g_ctx_var()}}->_items.{{i.collName}});
+    {%- else -%}
     cncTag_t _tag[] = { {{i.key|join(", ")}} };
     const size_t _tagSize = sizeof(_tag)/sizeof(*_tag);
     return _cncGet(_tag, _tagSize, _destination, _slot, _mode, _CNC_ITEM_COLL_HANDLE({{util.g_ctx_var()}}, {{i.collName}}, _loc));
-    {%- else -%}
-    return _cncGetSingleton(_destination, _slot, _mode, _CNC_ITEM_COLL_HANDLE({{util.g_ctx_var()}}, {{i.collName}}, _loc));
     {%- endif %}
     {%- else -%}
     {% set targetColl = g.itemDeclarations[i.mapTarget] -%}

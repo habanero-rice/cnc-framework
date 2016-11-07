@@ -1,14 +1,10 @@
-{% import "common_macros.inc.c" as util with context -%}
-{{ util.auto_file_banner() }}
+{% extends "ocr-common/cncocr_itemcoll.c" %}
 
-#include "cncocr_internal.h"
-
+{% block cnc_itemcoll_internal -%}
 #define CNC_ITEMS_PER_BLOCK 64
 
 #define CNC_ITEM_BLOCK_FULL(block) ((block)->count == CNC_ITEMS_PER_BLOCK)
 #define CNC_GETTER_GUID ((ocrGuid_t)-1)
-
-#define SIMPLE_DBCREATE(guid, ptr, sz) ocrDbCreate(guid, ptr, sz, DB_PROP_NONE, NULL_GUID, NO_ALLOC)
 
 typedef struct {
     ocrGuid_t entry;
@@ -334,16 +330,4 @@ void _cncItemCollectionDestroy(cncItemCollection_t coll) {
     // FIXME - need to do a deep traversal to really destroy the collection
     ocrDbDestroy(coll);
 }
-
-cncItemCollection_t _cncItemCollectionSingletonCreate(void) {
-    ocrGuid_t coll;
-    // FIXME - 1 below should be a property name...
-    ocrEventCreate(&coll, OCR_EVENT_IDEM_T, 1);
-    return coll;
-}
-
-void _cncItemCollectionSingletonDestroy(cncItemCollection_t coll) {
-    // FIXME - need to do a deep traversal to really destroy the collection
-    ocrEventDestroy(coll);
-}
-
+{% endblock cnc_itemcoll_internal %}

@@ -59,11 +59,14 @@ static inline u64 _cncTagHash(cncTag_t *components, u32 length) {
 }
 {% endblock tag_util -%}
 
+
+u8 ocrEventDestroyDeep(ocrGuid_t event);
+
 cncItemCollection_t _cncItemCollectionCreate(void);
 void _cncItemCollectionDestroy(cncItemCollection_t coll);
 
-cncItemCollection_t _cncItemCollectionSingletonCreate(void);
-void _cncItemCollectionSingletonDestroy(cncItemCollection_t coll);
+cncItemSingleton_t _cncItemCollectionSingletonCreate(void);
+void _cncItemCollectionSingletonDestroy(cncItemSingleton_t coll);
 
 #define _CNC_GETTER_ROLE 'G'
 #define _CNC_PUTTER_ROLE 'P'
@@ -84,18 +87,14 @@ static inline void _cncGet(cncTag_t *tag, int tagLength, ocrGuid_t destination, 
 
 {% block singleton_ops -%}
 /* Put a singleton item */
-static inline void  _cncPutSingleton(ocrGuid_t item, cncItemCollHandle_t handle) {
-    cncTag_t tag = 0;
-    tag = -_cncTagHash(&tag, 1);
-    _cncPut(item, &tag, 1, handle);
+static inline void  _cncPutSingleton(ocrGuid_t item, cncItemSingleton_t coll) {
+    ocrEventSatisfy(coll, item);
 }
 
 /* Get GUID for singleton item */
 static inline void _cncGetSingleton(ocrGuid_t destination, u32 slot, ocrDbAccessMode_t mode,
-        cncItemCollHandle_t handle) {
-    cncTag_t tag = 0;
-    tag = -_cncTagHash(&tag, 1);
-    _cncGet(&tag, 1, destination, slot, mode, handle);
+        cncItemSingleton_t coll) {
+    ocrAddDependence(coll, destination, slot, mode);
 }
 {% endblock singleton_ops -%}
 

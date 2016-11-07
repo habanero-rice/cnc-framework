@@ -3,7 +3,8 @@
 
 #include "ocr.h"
 
-typedef ocrGuid_t cncItemCollection_t;
+typedef ocrGuid_t cncItemCollection_t; // item collections
+typedef ocrGuid_t cncItemSingleton_t;  // item collection singletons
 
 typedef struct {
     cncItemCollection_t coll;

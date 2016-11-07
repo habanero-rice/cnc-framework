@@ -9,6 +9,7 @@
 #endif /* CNC_DISTRIBUTED */
 
 typedef struct _cncItemCollEntry **cncItemCollection_t; // item collections
+typedef ocrGuid_t cncItemSingleton_t;                   // item collection singletons
 
 typedef struct {
     cncItemCollection_t coll;

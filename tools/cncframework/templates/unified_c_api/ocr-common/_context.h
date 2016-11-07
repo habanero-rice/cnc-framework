@@ -22,7 +22,11 @@ typedef struct {{g.name}}Context {
     } _guids;
     struct {
         {%- for i in g.concreteItems %}
-        cncItemCollection_t {{i.collName}};
+        {%- if i.isSingleton %}
+        cncItemSingleton_t
+        {%- else %}
+        cncItemCollection_t
+        {%- endif %} {{i.collName}};
         {%- endfor %}
     } _items;
     struct {
