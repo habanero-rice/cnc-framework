@@ -38,13 +38,31 @@ u8 ocrEventDestroyDeep(ocrGuid_t event) {
 {#/* Allow sub-templates to override the internal item singleton collection interface */-#}
 {% block cnc_itemcoll_singleton_internal -%}
 cncItemSingleton_t _cncItemCollectionSingletonCreate(void) {
-    ocrGuid_t coll;
+    cncItemSingleton_t coll;
     // FIXME - Create with new event affinity API in OCR v1.2.0
-    ocrEventCreate(&coll, OCR_EVENT_IDEM_T, EVT_PROP_TAKES_ARG);
+    ocrEventCreate(&coll.only, OCR_EVENT_IDEM_T, EVT_PROP_TAKES_ARG);
     return coll;
 }
 
 void _cncItemCollectionSingletonDestroy(cncItemSingleton_t coll) {
-    ocrEventDestroyDeep(coll);
+    ocrEventDestroyDeep(coll.only);
 }
 {% endblock cnc_itemcoll_singleton_internal %}
+
+{#/* Allow sub-templates to override the internal dense-item collection interface */-#}
+{% block cnc_itemcoll_dense_internal -%}
+{% if g.hasTuning('dense_mapping') -%}
+cncItemCollectionDense_t _cncItemCollectionDenseCreate(u64 count) {
+    cncItemCollectionDense_t coll;
+    printf("LABELED GUID COUNT = %" PRIu64"\n", count); // XXX DEBUG
+    ocrGuidRangeCreate(&coll.base, count, GUID_USER_EVENT_IDEM);
+    return coll;
+}
+
+void _cncItemCollectionDenseDestroy(cncItemCollectionDense_t coll) {
+    // FIXME - should do a deep destroy of all contained datablocks
+    // Update to OCR v1.2.0 GUID Range destroy function
+    ocrGuidMapDestroy(coll.base);
+}
+{% endif -%}
+{% endblock cnc_itemcoll_dense_internal %}

@@ -20,7 +20,7 @@ else
 endif #OCR_NODEFILE
 {% endblock %}
 
-{% block xtra_config_flags %} --guid COUNTED_MAP --target mpi{% endblock %}
+{% block xtra_config_flags %} --target mpi{% endblock %}
 
 {% block run_checks -%}
 @[ -z "$(CNC_MPI_WARNING)" ] || echo $(CNC_MPI_WARNING)

@@ -74,22 +74,21 @@ pthread_mutex_t _cncDebugMutex = PTHREAD_MUTEX_INITIALIZER;
 static void _initCtxColls({{util.g_ctx_param()}}) {
     // initialize item collections
     {% for i in g.concreteItems -%}
-    {% with -%}
-    {% if i.isSingleton -%}
-    {% set coll_create_fn = "_cncItemCollectionSingletonCreate" -%}
-    {% elif False -%}
-    {% set coll_create_fn = "_cncItemCollectionCreate" -%}
-    {% else -%}
-    {% set coll_create_fn = "_cncItemCollectionCreate" -%}
-    {% endif -%}
-    {{util.g_ctx_var()}}->_items.{{i.collName}} = {{ coll_create_fn }}();
-    {% endwith -%}
+    {{util.g_ctx_var()}}->_items.{{i.collName}} = {#/* preserve space */#}
+    {%- if i.isSingleton -%}
+        _cncItemCollectionSingletonCreate()
+    {%- elif g.itemIsDense(i) -%}
+        _cncItemCollectionDenseCreate({{ g.itemDenseMappingLength(i) }})
+    {%- else -%}
+        _cncItemCollectionCreate()
+    {%- endif -%}
+    ;
     {% endfor -%}
     // initialize step collections
-    {% for s in g.finalAndSteps -%}
+    {%- for s in g.finalAndSteps %}
     ocrEdtTemplateCreate(&{{util.g_ctx_var()}}->_steps.{{s.collName}},
             _{{g.name}}_cncStep_{{s.collName}}, EDT_PARAM_UNK, EDT_PARAM_UNK);
-    {% endfor -%}
+    {%- endfor %}
 }
 
 #ifdef CNC_AFFINITIES
@@ -153,10 +152,12 @@ void {{g.name}}_destroy({{util.g_ctx_param()}}) {
     ocrEventDestroy({{util.g_ctx_var()}}->_guids.doneEvent);
     // destroy item collections
     {% for i in g.concreteItems -%}
-    {% if i.key -%}
-    _cncItemCollectionDestroy({{util.g_ctx_var()}}->_items.{{i.collName}});
-    {% else -%}
+    {% if i.isSingleton -%}
     _cncItemCollectionSingletonDestroy({{util.g_ctx_var()}}->_items.{{i.collName}});
+    {%- elif g.itemIsDense(i) -%}
+    _cncItemCollectionDenseDestroy({{util.g_ctx_var()}}->_items.{{i.collName}});
+    {% else -%}
+    _cncItemCollectionDestroy({{util.g_ctx_var()}}->_items.{{i.collName}});
     {% endif -%}
     {% endfor -%}
     // destroy step collections

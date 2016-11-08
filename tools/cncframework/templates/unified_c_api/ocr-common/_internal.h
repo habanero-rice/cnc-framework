@@ -22,6 +22,14 @@ static inline cncLocation_t _cncItemDistFn_{{name}}({{ util.print_tag(i.key, typ
 {% endfor -%}
 #endif /* CNC_AFFINITIES */
 
+{% if g.hasTuning('dense_mapping') -%}
+{% for name, i in g.itemDeclarations.items() -%}
+{% if g.itemIsDense(i) -%}
+static inline u64 _cncItemDenseMappingFn_{{name}}({{ util.print_tag(i.key, typed=True) ~ util.g_ctx_param()}}) { return {{g.itemDenseMappingFn(name)}}; }
+{% endif -%}
+{% endfor -%}
+{%- endif %}
+
 /********************************\
  ******** STEP FUNCTIONS ********
 \********************************/

@@ -75,7 +75,7 @@ $(OCR_AR):
 ifdef OCR_GENERATED_CONFIG
 $(OCR_GENERATED_CONFIG):
 	$(ensure_dir)
-	$(OCR_INSTALL_ROOT)/share/ocr/scripts/Configs/config-generator.py {% block xtra_config_flags %}{% endblock %} --threads $(CONFIG_NUM_THREADS) --remove-destination $(CONFIG_FLAGS) --output $@
+	$(OCR_INSTALL_ROOT)/share/ocr/scripts/Configs/config-generator.py --guid LABELED {% block xtra_config_flags %}{% endblock %} --threads $(CONFIG_NUM_THREADS) --remove-destination $(CONFIG_FLAGS) --output $@
 endif #OCR_GENERATED_CONFIG
 {% endblock xtra_targets %}
 

@@ -29,6 +29,9 @@ void cncPut_{{i.collName}}({{i.type.ptrType}}_item, {{
     // FIXME - affinities not correctly set for singletons
     // _cncPutSingleton(_handle, _CNC_ITEM_COLL_HANDLE({{util.g_ctx_var()}}, {{i.collName}}, _loc));
     _cncPutSingleton(_handle, {{util.g_ctx_var()}}->_items.{{i.collName}});
+    {%- elif g.itemIsDense(i) %}
+    const u64 _idx = _cncItemDenseMappingFn_{{i.collName}}({{ util.print_tag(i.key) ~ util.g_ctx_var()}});
+    _cncPutDense(_handle, {{util.g_ctx_var()}}->_items.{{i.collName}}, _idx);
     {%- else -%}
     cncTag_t _tag[] = { {{i.key|join(", ")}} };
     const size_t _tagSize = sizeof(_tag)/sizeof(*_tag);
@@ -62,6 +65,9 @@ void cncGet_{{i.collName}}({{ util.print_tag(i.key, typed=True) }}ocrGuid_t _des
     // FIXME - affinities not correctly set for singletons
     // return _cncGetSingleton(_destination, _slot, _mode, _CNC_ITEM_COLL_HANDLE({{util.g_ctx_var()}}, {{i.collName}}, _loc));
     return _cncGetSingleton(_destination, _slot, _mode, {{util.g_ctx_var()}}->_items.{{i.collName}});
+    {%- elif g.itemIsDense(i) %}
+    const u64 _idx = _cncItemDenseMappingFn_{{i.collName}}({{ util.print_tag(i.key) ~ util.g_ctx_var()}});
+    _cncGetDense(_destination, _slot, _mode, {{util.g_ctx_var()}}->_items.{{i.collName}}, _idx);
     {%- else -%}
     cncTag_t _tag[] = { {{i.key|join(", ")}} };
     const size_t _tagSize = sizeof(_tag)/sizeof(*_tag);

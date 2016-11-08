@@ -24,6 +24,8 @@ typedef struct {{g.name}}Context {
         {%- for i in g.concreteItems %}
         {%- if i.isSingleton %}
         cncItemSingleton_t
+        {%- elif g.itemIsDense(i) %}
+        cncItemCollectionDense_t
         {%- else %}
         cncItemCollection_t
         {%- endif %} {{i.collName}};

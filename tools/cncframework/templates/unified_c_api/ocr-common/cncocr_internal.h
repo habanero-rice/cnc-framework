@@ -13,6 +13,11 @@
 #include <extensions/ocr-affinity.h>
 #endif /* CNC_AFFINITIES */
 
+{% if g.hasTuning('dense_mapping') -%}
+#define ENABLE_EXTENSION_LABELING
+#include <extensions/ocr-labeling.h>
+{%- endif %}
+
 #if CNCOCR_x86
 #    ifndef HAL_X86_64
 #    define hal_memCopy(dest, src, len, bg) memcpy(dest, src, len)
@@ -68,6 +73,11 @@ void _cncItemCollectionDestroy(cncItemCollection_t coll);
 cncItemSingleton_t _cncItemCollectionSingletonCreate(void);
 void _cncItemCollectionSingletonDestroy(cncItemSingleton_t coll);
 
+{% if g.hasTuning('dense_mapping') -%}
+cncItemCollectionDense_t _cncItemCollectionDenseCreate(u64 count);
+void _cncItemCollectionDenseDestroy(cncItemCollectionDense_t coll);
+{%- endif %}
+
 #define _CNC_GETTER_ROLE 'G'
 #define _CNC_PUTTER_ROLE 'P'
 
@@ -87,16 +97,39 @@ static inline void _cncGet(cncTag_t *tag, int tagLength, ocrGuid_t destination, 
 
 {% block singleton_ops -%}
 /* Put a singleton item */
-static inline void  _cncPutSingleton(ocrGuid_t item, cncItemSingleton_t coll) {
-    ocrEventSatisfy(coll, item);
+static inline void _cncPutSingleton(ocrGuid_t item, cncItemSingleton_t coll) {
+    ocrEventSatisfy(coll.only, item);
 }
 
 /* Get GUID for singleton item */
 static inline void _cncGetSingleton(ocrGuid_t destination, u32 slot, ocrDbAccessMode_t mode,
         cncItemSingleton_t coll) {
-    ocrAddDependence(coll, destination, slot, mode);
+    ocrAddDependence(coll.only, destination, slot, mode);
 }
 {% endblock singleton_ops -%}
+
+{% block dense_item_ops -%}
+{% if g.hasTuning('dense_mapping') -%}
+/* Put an instance in a dense item collection */
+static inline void _cncPutDense(ocrGuid_t item, cncItemCollectionDense_t coll, u64 index) {
+    ocrGuid_t target;
+    ocrGuidFromIndex(&target, coll.base, index);
+    // checked creation solves producer/consumer race
+    ocrEventCreate(&target, OCR_EVENT_IDEM_T, EVT_PROP_TAKES_ARG | GUID_PROP_CHECK);
+    ocrEventSatisfy(target, item);
+}
+
+/* Get an instance from a dense item collection */
+static inline void _cncGetDense(ocrGuid_t destination, u32 slot, ocrDbAccessMode_t mode,
+        cncItemCollectionDense_t coll, u64 index) {
+    ocrGuid_t target;
+    ocrGuidFromIndex(&target, coll.base, index);
+    // checked creation solves producer/consumer race
+    ocrEventCreate(&target, OCR_EVENT_IDEM_T, EVT_PROP_TAKES_ARG | GUID_PROP_CHECK);
+    ocrAddDependence(target, destination, slot, mode);
+}
+{% endif -%}
+{% endblock dense_item_ops -%}
 
 static inline ocrGuid_t _cncCurrentAffinity() {
     #ifdef CNC_AFFINITIES

@@ -15,15 +15,3 @@ static inline bool memcmp(const void *a, const void *b, size_t n) {
 
 {{ super() }}
 {% endblock tag_util -%}
-
-{% block singleton_ops -%}
-/* Put a singleton item */
-static inline void  _cncPutSingleton(ocrGuid_t item, cncItemCollHandle_t handle) {
-    ocrEventSatisfy(handle.coll, item);
-}
-
-/* Get GUID for singleton item */
-static inline void _cncGetSingleton(ocrGuid_t destination, u32 slot, ocrDbAccessMode_t mode, cncItemCollHandle_t handle) {
-    ocrAddDependence(handle.coll, destination, slot, mode);
-}
-{% endblock singleton_ops -%}

@@ -8,8 +8,9 @@
 #define CNC_AFFINITIES 1
 #endif /* CNC_DISTRIBUTED */
 
-typedef struct _cncItemCollEntry **cncItemCollection_t; // item collections
-typedef ocrGuid_t cncItemSingleton_t;                   // item collection singletons
+typedef struct _cncItemCollEntry **cncItemCollection_t;      // item collections
+typedef struct { ocrGuid_t only; } cncItemSingleton_t;       // item collection singletons
+typedef struct { ocrGuid_t base; } cncItemCollectionDense_t; // dense item collection vectors
 
 typedef struct {
     cncItemCollection_t coll;
