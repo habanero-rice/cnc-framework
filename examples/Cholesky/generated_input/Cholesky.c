@@ -56,8 +56,7 @@ void Cholesky_cncInitialize(CholeskyArgs *args, CholeskyCtx *ctx) {
     cncPrescribe_kComputeStep(ctx);
 
     // Set finalizer function's tag
-    int tileCount = ctx->numTiles * (ctx->numTiles + 1) / 2;
-    Cholesky_await(tileCount, ctx);
+    Cholesky_await(ctx->tileCount, ctx);
 }
 
 

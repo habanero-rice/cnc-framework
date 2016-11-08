@@ -22,6 +22,7 @@ int cncMain(int argc, char *argv[]) {
     int matrixCols = atoi(argv[1]);
     int tileSize = atoi(argv[2]);
     int numTiles = matrixCols / tileSize;
+    int tileCount = numTiles * (numTiles + 1) / 2;
     CNC_REQUIRE(matrixCols % tileSize == 0,
             "Incompatible tile size %d for the matrix of size %d\n", tileSize, matrixCols);
 
@@ -40,6 +41,7 @@ int cncMain(int argc, char *argv[]) {
     // Set graph parameters
     context->numTiles = numTiles;
     context->tileSize = tileSize;
+    context->tileCount = tileCount;
 
     // Launch the graph for execution
     Cholesky_launch(args, context);
