@@ -136,23 +136,28 @@ class LatticeContext(object):
     def make_slice(self, *node_strings):
         return Slice(map(self.lookup, node_strings))
     def find_all_slices(self):
-        found = set([])
-        step_count = len(self.graph.step_colls)
-        def find_recursive(nodes, covered):
-            assert len(covered) < step_count
-            assert len(nodes) < step_count
-            for x in self.nodes.values():
-                xc = x.collection.base_collections
-                if not (xc & covered):
-                    covered_x = xc | covered
-                    nodes_x = nodes + [x]
-                    if len(covered_x) == step_count:
-                        nodes_x = tuple(sorted(nodes_x, key=lambda y: y.id))
-                        found.add(nodes_x)
+        slices = []
+        elements = list(self.nodes.values())
+        base_coll_count = len(self.graph.step_colls)
+        def _find_slices(xs, covered, i):
+            if i < len(elements):
+                x = elements[i]
+                x_covered = x.collection.base_collections
+                # Don't include element x, and recur
+                _find_slices(xs, covered, i+1)
+                # Try to include x and recur
+                if not (x_covered & covered):
+                    xs_prime = xs + [x]
+                    covered_prime = set(covered)
+                    covered_prime.update(x_covered)
+                    if len(covered_prime) == base_coll_count:
+                        # Found complete slice
+                        slices.append(tuple(xs_prime))
                     else:
-                        find_recursive(nodes_x, covered_x)
-        find_recursive([], set([]))
-        return [ Slice(xs) for xs in found ]
+                        # The current slice is incomplete, so keep searching
+                        _find_slices(xs_prime, covered_prime, i+1)
+        _find_slices([], set([]), 0)
+        return [ Slice(xs) for xs in slices ]
 
 class Node(object):
     def __init__(self, context, collection):
