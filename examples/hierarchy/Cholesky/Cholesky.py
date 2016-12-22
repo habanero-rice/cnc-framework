@@ -65,6 +65,9 @@ Slices = Ctx.find_all_slices()
 Full = Ctx.find_all_full_hierarchies()
 FullCount = Full.accept(cncframework.lattice.CountingHierarchyVisitor())
 
+def print_full_hierarchies():
+    cncframework.lattice.print_full_hierarchies(Full)
+
 
 ####################################
 

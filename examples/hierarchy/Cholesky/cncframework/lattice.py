@@ -8,8 +8,7 @@ def _force_all(xs):
     else:
         return xs
 
-class CompositionException(Exception):
-    pass
+class CompositionException(Exception): pass
 
 class PairwiseComposition(object):
     """
@@ -103,24 +102,44 @@ class HierarchyJoin(object):
     def accept(self, visitor):
         return visitor.for_join(self)
 
-class DumpPrintHierarchyVisitor(object):
-    def __init__(self):
-        self.depth = 0
-        pass
+class IteratingHierarchyVisitor(object):
+    def __init__(self, depth=0):
+        self.depth = depth
     def for_element(self, element):
-        self.depth += 1
-        print (">" * self.depth), element.node
-        for x in element.tails:
-            x.accept(self)
-        self.depth -= 1
+        node = ((self.depth, element.node),)
+        # Recursive case
+        if element.tails:
+            v = IteratingHierarchyVisitor(self.depth+1)
+            return tuple(node + seq
+                    for tail in element.tails
+                    for seq in tail.accept(v))
+        # Base case
+        else:
+            return (node,)
     def for_join(self, join):
-        join.left.accept(self)
-        join.right.accept(self)
+        lhs = join.left.accept(self)
+        rhs = join.right.accept(self)
+        pairs = itertools.product(lhs, rhs)
+        return tuple(x+y for x, y in pairs)
+
+def print_full_hierarchies(top):
+    v = IteratingHierarchyVisitor()
+    for xs in top.accept(v):
+        for depth, node in xs:
+            print ("  " * depth) + str(node)
+        print
+
+# TODO - write a function to print DOT files for hierarchies
 
 class CountingHierarchyVisitor(object):
     def __init__(self):
-        pass
+        self.memos = {}
     def for_element(self, element):
+        node = element.node
+        can_memoize = node.has_multiple_compositions()
+        if can_memoize:
+            memo = self.memos.get(node.id)
+            if memo: return memo
         # Recursive case
         if element.tails:
             count = 0
@@ -129,6 +148,7 @@ class CountingHierarchyVisitor(object):
         # Base case
         else:
             count = 1
+        if can_memoize: self.memos[node.id] = count
         return count
     def for_join(self, join):
         lhs = join.left.accept(self)
@@ -224,10 +244,10 @@ class LatticeContext(object):
             return HierarchyJoin(childX, childY)
         def _find_full_hierachies(element):
             # Check for memoized answer
-            memo = memos.get(element.id)
-            if memo:
-                print ">>> Skipping", element.id
-                return memo
+            can_memoize = element.has_multiple_compositions()
+            if can_memoize:
+                memo = memos.get(element.id)
+                if memo: return memo
             # Choose homogeneous decompositions
             tails = [_find_full_hierachies(x.child)
                     for x in element.tag_decompositions]
@@ -237,7 +257,8 @@ class LatticeContext(object):
                 element.pairwise_decompositions))
             # Save memo and return result
             result = HierarchyElement(element, tails)
-            memos[element.id] = result
+            if can_memoize:
+                memos[element.id] = result
             return result
         return _find_full_hierachies(self.root)
 
@@ -295,6 +316,10 @@ class Node(object):
         parent.descendents.update(self.descendents)
         parent.descendents.add(self)
         return parent
+    def has_multiple_compositions(self):
+        pcs = len(self.pairwise_compositions)
+        tcs = len(self.tag_compositions)
+        return pcs + tcs > 0
     def is_first_child(self):
         if self.pairwise_compositions:
             parent = self.pairwise_compositions[0].parent
