@@ -316,6 +316,20 @@ class Node(object):
         parent.descendents.update(self.descendents)
         parent.descendents.add(self)
         return parent
+    def label_str(self):
+        name, tag = self.id
+        if tag:
+            tag_str = ", ".join(tag)
+            return "{}: {}".format(name, tag_str)
+        else:
+            return name
+    def safe_str(self):
+        name, tag = self.id
+        if tag:
+            tag_str = "_".join(tag)
+            return "{}_{}".format(name, tag_str)
+        else:
+            return name
     def has_multiple_compositions(self):
         pcs = len(self.pairwise_compositions)
         tcs = len(self.tag_compositions)
