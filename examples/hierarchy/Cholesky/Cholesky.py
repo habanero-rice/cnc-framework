@@ -62,6 +62,9 @@ Ctx = cncframework.lattice.LatticeContext(graph,
 
 
 Slices = Ctx.find_all_slices()
+Full = Ctx.find_all_full_hierarchies()
+FullCount = Full.accept(cncframework.lattice.CountingHierarchyVisitor())
+
 
 ####################################
 
