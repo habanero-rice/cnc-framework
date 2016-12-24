@@ -1,4 +1,5 @@
 import itertools
+import collections
 
  # TODO - delete these
 import collections
@@ -129,7 +130,7 @@ def print_full_hierarchies(top):
             print ("  " * depth) + str(node)
         print
 
-# TODO - write a function to print DOT files for hierarchies
+# NOTE: DOT file printing function is in Cholesky.py
 
 class CountingHierarchyVisitor(object):
     def __init__(self):
@@ -261,6 +262,43 @@ class LatticeContext(object):
                 memos[element.id] = result
             return result
         return _find_full_hierachies(self.root)
+    def find_all_hierarchies(self):
+        top = self.find_all_full_hierarchies()
+        v = IteratingHierarchyVisitor()
+        full_hierarchies = tuple(tuple(node for _, node in xs)
+                for xs in top.accept(v))
+        hierarchies = set(full_hierarchies)
+        def _update_counts(orig_counts, x):
+            counts = collections.Counter(orig_counts)
+            bases = x.collection.base_collections
+            for base in bases:
+                if counts[base] == 1:
+                    # No longer covering all base collections
+                    return None
+            counts.subtract(bases)
+            return counts
+        def _find_hierarchies(hierarchy, counts, elements, i):
+            if i < len(elements):
+                x = elements[i]
+                # Include element x, and recur
+                _find_hierarchies(hierarchy, counts, elements, i+1)
+                # Try removing element x
+                counts_prime = _update_counts(counts, x)
+                if counts_prime:
+                    hierarchy_prime = hierarchy - frozenset([x])
+                    if not (hierarchy_prime in hierarchies):
+                        hierarchies.add(hierarchy_prime)
+                        _find_hierarchies(
+                                hierarchy_prime, counts_prime, elements, i+1)
+                # NOTE: I could avoid copying the counter
+                # by restoring the previous count at this point
+        for fh in full_hierarchies:
+            counts = collections.Counter()
+            for node in fh:
+                counts.update(node.collection.base_collections)
+            _find_hierarchies(frozenset(fh), counts, fh, 0)
+        return hierarchies
+
 
 class Node(object):
     def __init__(self, context, collection):
