@@ -372,6 +372,8 @@ class Node(object):
         pcs = len(self.pairwise_compositions)
         tcs = len(self.tag_compositions)
         return pcs + tcs > 0
+    def is_leaf(self):
+        return not (self.pairwise_decompositions or self.tag_decompositions)
     def is_first_child(self):
         if self.pairwise_compositions:
             parent = self.pairwise_compositions[0].parent
