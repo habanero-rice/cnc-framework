@@ -9,7 +9,7 @@
 ( $initialize: () )
  -> [ tile: $range(0, NUM_TILES), 0 ],
     [ fromLeft: $range(1, NUM_TILES), 0 ],
-    [ fromRight: $range(0, NUM_TILES-1), 0 ]
+    [ fromRight: $range(0, NUM_TILES-1), 0 ],
     ( stencil: $range(0, NUM_TILES), $range(1, LAST_TIMESTEP+1) );
 
 ( stencil: i, t )
