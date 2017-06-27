@@ -85,7 +85,8 @@ Verifying the installation
 --------------------------
 
 You can verify the installation by running the `$UCNC_ROOT/test/run_tests.sh`
-script.  The script builds, runs, and verifies the results of a few simple CnC
+script, or `$UCNC_ROOT/test/run_tests.sh --platform=icnc` if using iCnC.
+The script builds, runs, and verifies the results of a few simple CnC
 test programs. More interesting example applications can be found in the
 `$UCNC_ROOT/examples` directory. Each example has an accompanying README with
 instructions on how to build and run the application, a general explanation
