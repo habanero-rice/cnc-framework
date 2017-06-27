@@ -19,7 +19,7 @@ for d in *; do
     echo ">>> Running test $d" | tee -a "$TEST_LOG"
 
     if true; then
-        cd $d && ${CNC_T:-${UCNC_T}} && ./implementSteps.sh
+        cd $d && ${CNC_T:-${UCNC_T}} "$@" && ./implementSteps.sh
     fi 2>&1 >> "$TEST_LOG"
     RES1="$?"
     EXPECTED_OUTPUT=`tail -n1 README`
