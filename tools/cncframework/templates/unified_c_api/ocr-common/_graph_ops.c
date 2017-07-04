@@ -275,7 +275,7 @@ void {{g.name}}_launch({{util.g_args_param()}}, {{util.g_ctx_param()}}) {
         ocrAddDependence(outEventGuid, {{util.g_ctx_var()}}->_guids.doneEvent, 0, DB_MODE_NULL);
     }
     // start the graph execution
-    ocrAddDependence(argsDbGuid, graphEdtGuid, 1, DB_DEFAULT_MODE);
+    ocrAddDependence(argsDbGuid, graphEdtGuid, 1, _CNC_ITEM_GET_MODE);
     ocrAddDependence({{util.g_ctx_var()}}->_guids.self, graphEdtGuid, 2, DB_DEFAULT_MODE);
 }
 
