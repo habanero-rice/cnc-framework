@@ -79,16 +79,26 @@ class UnifiedTranslator(object):
         self.templates_init()
 
     def args_init(self, platforms):
+        # default value for target platform
+        default_platform = 'ocr'
         # args setup
         desc="CnC unified C API graph translator tool, version {0}. Parses a CnC graph specification, and generates a project from the specification.".format(__version__)
         self.arg_parser = argparse.ArgumentParser(prog=self.prog_name, description=desc)
         self.arg_parser.add_argument('--version', action='version', version='%(prog)s v{0}'.format(__version__))
-        self.arg_parser.add_argument("-p", "--platform", choices=platforms.keys(), default="ocr", help="target code generation platform")
+        self.arg_parser.add_argument("-p", "--platform", choices=platforms.keys(), help="target code generation platform (default={})".format(default_platform))
         self.arg_parser.add_argument("--ocr-pure", action='store_true', default=False, help="use pure OCR implementation (no platform-specific code)")
         self.arg_parser.add_argument("-t", "--tuning-spec", action='append', help="CnC tuning spec file")
         self.arg_parser.add_argument("specfile", nargs='?', default="", help="CnC graph spec file")
         # parse the args
         self.args = self.arg_parser.parse_args()
+        # allow override of default (unspecified) platform via environment
+        if self.args.platform is None:
+            env_platform = os.environ.get('UCNC_PLATFORM')
+            if env_platform:
+                print "Overriding default platform via UCNC_PLATFORM environment variable:", env_platform
+                self.args.platform = env_platform
+            else:
+                self.args.platform = default_platform
         # allow override for generic OCR platform
         if self.args.platform == "ocr":
             ocr_type = os.environ.get('OCR_TYPE')
