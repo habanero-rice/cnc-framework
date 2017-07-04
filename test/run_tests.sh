@@ -38,7 +38,11 @@ for d in *; do
 done
 
 echo "Ran $TOTAL tests, with $FAILURES failures."
-echo "See '$TEST_LOG' for details."
+if [[ "$CONTINUOUS_INTEGRATION" == true && $FAILURES > 0 ]]; then
+    cat $TEST_LOG
+else
+    echo "See '$TEST_LOG' for details."
+fi
 
 # Only successful if there were no failures
 [ $FAILURES = 0 ]
