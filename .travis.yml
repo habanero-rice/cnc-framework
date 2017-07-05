@@ -1,0 +1,31 @@
+# Use Ubuntu 14.04 Trusty for GCC 4.8
+dist: trusty
+sudo: required
+language: cpp
+
+branches:
+  only:
+  - master
+
+before_install:
+- sudo apt-get update -qq
+- export XSTG_ROOT=$PWD/xstg
+
+install:
+- sudo apt-get install -y openmpi-bin libopenmpi-dev procmail
+# Install OCR
+- mkdir -p $XSTG_ROOT/ocr
+- ocr_git=https://xstack.exascale-tech.com/git/public?p=ocr.git
+- curl --referer "$ocr_git" "$ocr_git;a=snapshot;h=refs/tags/OCRv1.1.0;sf=tbz2" | tar xj -C $XSTG_ROOT/ocr --strip-components 1
+- for x in x86 x86-mpi; do env CC=cc OCR_TYPE=$x make -C $XSTG_ROOT/ocr/ocr -j install || exit 1; done
+# Install Intel CnC
+- curl -L 'https://downloads.sourceforge.net/project/icnc/1.0.100/l_cnc_b_1.0.100.tgz' | tar xz
+- printf '\naccept\n\n\ny\n' | sudo bash -c 'shopt -s expand_aliases; cd cnc; alias less=cat; alias cd=:; source install.sh'
+- source /opt/intel/cnc/1.0.100/bin/cncvars.sh
+
+before_script:
+- source setup_env.sh
+
+script:
+- eval ! ucnc_t
+- for platform in ocr ocr/mpi icnc icnc/mpi; do echo "TESTING $platform"; ./test/run_tests.sh -p $platform || exit 1; done
