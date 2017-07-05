@@ -85,7 +85,7 @@ def closing(tok):
 def delimiter(tok):
     """Tries to match a delimiter token (e.g., a semicolon),
        and gives a failure if it is not found."""
-    return tok | failure("Expected delimiter: '{0}'".format(tok))
+    return Suppress(tok) | failure("Expected delimiter '{0}'".format(tok))
 
 
 ##################################################
@@ -129,7 +129,7 @@ cArraySuffix = "[" + cExpr('arraySize') + closing("]")
 
 cncContext = ( CaselessKeyword("$context").suppress() + Suppress("{")
              + cExpr('fields') + closing("}").suppress()
-             + delimiter(";").suppress() )
+             + delimiter(";") )
 
 
 ##################################################
@@ -175,7 +175,7 @@ rangedTC = Group(kind('RANGED') + (rangeExpr | oldRangeExpr))
 
 attrKey = cVar
 attrVal = cTopExpr
-attrPair = Group(attrKey + delimiter(":").suppress() + attrVal)
+attrPair = Group(attrKey + delimiter(":") + attrVal)
 attrDictSep = Suppress(",")
 attrDict = Suppress("{") + Optional(Dict(attrPair + ZeroOrMore(attrDictSep + attrPair))) + closing("}").suppress()
 optAttrs = Optional(attrDict)
@@ -195,7 +195,7 @@ scalarTagExpr = rep1sep(scalarExpr | failure("Expected tag expression"))
 # (used in step input/output relationships)
 
 itemRef = (Group("[" + kind('ITEM') + Optional(cVar('binding') + "@")
-                + cVar('collName') + delimiter(":").suppress()
+                + cVar('collName') + delimiter(":")
                 + tagExpr('key') + closing("]"))
            | failure("Expected input item reference"))
 
