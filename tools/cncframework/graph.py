@@ -217,13 +217,13 @@ def verifyCollectionDecls(typ, decls):
     nameCounts = Counter([ x.collName for x in decls ])
     repeated = [ name for name, n in nameCounts.iteritems() if n > 1 ]
     if repeated:
-        exit("Repeated {0} collection names: {1}".format(typ, ", ".join(repeated)))
+        exit("Repeated {0} collection names in graph spec: {1}".format(typ, ", ".join(repeated)))
 
 
 def verifyEnv(stepFuns):
     for name in [initNameRaw, finalizeNameRaw]:
         if not name in stepFuns:
-            exit("Missing I/O declaration for environment ({0}).".format(name))
+            exit("Missing I/O declaration for environment in graph spec: {0}".format(name))
 
 # TODO - verify item/step instances match with their declarations
 
