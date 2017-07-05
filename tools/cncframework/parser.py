@@ -1,4 +1,7 @@
+import sys
 from pyparsing import *
+
+cncStyleComment = cppStyleComment
 
 
 ##################################################
@@ -13,7 +16,7 @@ def updateClosestMatchError(err):
     else:
         currentLoc = (closestMatchError.lineno, closestMatchError.col)
         newLoc = (err.lineno, err.col)
-        if newLoc > currentLoc:
+        if newLoc > currentLoc or not isinstance(closestMatchError.parserElement, FailureHint):
             closestMatchError = err
 
 class FailureHint(Token):
@@ -36,12 +39,44 @@ class FailureHint(Token):
 def failure(msg):
     return FailureHint(msg)
 
+def unskip(self):
+    program = self.pstr[:self.loc]
+    def record_location(loc,tokens):
+        assert len(tokens) == 1
+        record_location.last = loc + len(tokens[0]) - 1
+        return tokens
+    record_location.last = 0
+    word = Regex(r"[^\s]+").ignore(cncStyleComment)
+    word.setParseAction(record_location)
+    slurper = ZeroOrMore(word)
+    slurper.parseString(program, parseAll=False)
+    return record_location.last
+
 def parserErrorWrapper(parser, specPath):
     try:
         return parser.parseFile(specPath, parseAll=True)
     except ParseException as err:
+        msg = "Error parsing " + specPath
         updateClosestMatchError(err)
-        raise closestMatchError
+        error_msg = closestMatchError.msg
+        program = closestMatchError.pstr
+        if closestMatchError.loc == len(program):
+            msg += ", at end of file:\n"
+            msg += error_msg
+        else:
+            e_loc = unskip(closestMatchError)
+            e_lineno = lineno(e_loc, program)
+            e_col = col(e_loc, program)
+            e_line = line(e_loc, program)
+            msg += ", at line {}, column {}:\n".format(e_lineno, e_col)
+            msg += error_msg
+            if not (e_lineno == 1 and e_col == 1):
+                msg += "\n\n" + e_line + "\n"
+                if e_col == 1:
+                    msg += "^~~~\n"
+                else:
+                    msg += ( "~" * e_col ) + "^\n"
+        sys.exit(msg)
 
 
 ##################################################
@@ -264,7 +299,7 @@ stepRelation = ( Group(stepDecl('step')
                       + Optional(delimiter("<-") + condItemRefs('inputs'))
                       + Optional(delimiter("->") + condInstanceRefs('outputs'))
                       + delimiter(";"))
-               | failure("Expected step function declaration") )
+               | failure("Expected a step function declaration") )
 
 
 ##################################################
@@ -275,7 +310,7 @@ graphCtx = Optional(joined(cncContext))
 itemColls = ZeroOrMore(itemDecl)
 stepColls = OneOrMore(stepRelation)
 cncGraphSpec = graphCtx('ctx') + itemColls('itemColls') + stepColls('stepRels')
-cncGraphSpec.ignore(cppStyleComment)
+cncGraphSpec.ignore(cncStyleComment)
 
 def parseGraphFile(specPath):
     return parserErrorWrapper(cncGraphSpec, specPath)
@@ -295,7 +330,7 @@ itemTunings = ZeroOrMore(itemTune)('itemTunings')
 stepTunings = ZeroOrMore(stepTune)('stepTunings')
 
 cncTuningSpec = itemTunings + stepTunings
-cncTuningSpec.ignore(cppStyleComment)
+cncTuningSpec.ignore(cncStyleComment)
 
 def parseTuningFile(specPath):
     return parserErrorWrapper(cncTuningSpec, specPath)
