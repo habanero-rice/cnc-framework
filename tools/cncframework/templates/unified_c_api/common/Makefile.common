@@ -35,7 +35,7 @@ CNC_SUPPORT_DIR  ?= $(WORKLOAD_SRC)/cnc_support/{% block support_dir_name %}$(CN
 # INCLUDES
 
 # Auto-parse arguments for "make run" (WORKLOAD_ARGS)
--include $(APPS_ROOT)/makefiles/make-pre.inc
+-include $(CNC_SUPPORT_DIR)/make_pre_inc.mk
 
 include $(CNC_SUPPORT_DIR)/{{g.name}}_defs.mk
 

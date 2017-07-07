@@ -198,6 +198,7 @@ class UnifiedTranslator(object):
         for f in self.support_files:
             self.write_template(f)
         self.write_template("_defs.mk")
+        self.write_template("make_pre_inc.mk")
         # graph files
         fname = "{0}.h".format(self.graph_name)
         self.write_template("Graph.h", filename=fname)
