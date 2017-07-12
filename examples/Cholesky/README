@@ -13,7 +13,9 @@ run and verify this application.
 This example has two versions. One reads the input matrix from a file, which is
 the same functionality as the OCR Cholesky example. This version is in the
 "file_input" subdirectory. The other version automatically generates an input
-matrix, and is located in the "generated_input" subdirectory.
+matrix, and is located in the "generated_input" subdirectory. We also included
+a symbolic link to "generated_input" called "default_project" to indicate that
+it is the simpler version of the app (no file I/O) and should be preferred.
 
 Note that the "common" directory does not contain a full application. The
 directory contains only the common files shared between the two versions,
